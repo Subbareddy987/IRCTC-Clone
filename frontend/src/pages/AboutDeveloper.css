@@ -2,8 +2,7 @@
   min-height: calc(100vh - 60px);
   background:
     linear-gradient(135deg, rgba(13, 27, 62, 0.96), rgba(25, 63, 150, 0.9)),
-    url("/vandebharat
-    .jpeg") center/cover;
+    url("/vandebharat.jpeg") center/cover;
   color: #ffffff;
   font-family: "Inter", system-ui, sans-serif;
   padding: 56px 24px 72px;
