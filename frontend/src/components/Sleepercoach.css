@@ -1,0 +1,187 @@
+/* SleeperCoach.css — Sleeper seat map (compact "departure board" theme) */
+
+.coach-wrapper {
+  --bg-dark: #0d1426;
+  --bg-panel: #151f3a;
+  --bg-seat: #1f2a47;
+  --bg-seat-booked: #232838;
+  --accent-available: #22c55e;
+  --accent-booked: #6b7280;
+  --accent-selected: #3b82f6;
+  --accent-selected-deep: #1d4ed8;
+  --text-light: #e6ecf5;
+  --text-muted: #8b96ab;
+  --warning-bg: #ef4444;
+
+  background: var(--bg-dark);
+  color: var(--text-light);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+  font-family: inherit;
+}
+
+.coach-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.coach-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  color: #93c5fd;
+}
+
+.coach-legend {
+  display: flex;
+  gap: 0.9rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.coach-legend > div {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.available { background: var(--accent-available); }
+.dot.booked { background: var(--accent-booked); }
+.dot.selected { background: var(--accent-selected); }
+
+.coach-warning {
+  background: var(--warning-bg);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 0.9rem;
+}
+
+.railway-coach {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.coach-bay {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-panel);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+}
+
+.main-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.seat-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.aisle-space {
+  width: 14px;
+  align-self: stretch;
+  border-left: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.side-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.seat-placeholder {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  visibility: hidden;
+}
+
+.rail-seat {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-seat);
+  border: none;
+  border-left: 3px solid var(--accent-available);
+  border-radius: 7px;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.rail-seat:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.rail-seat:focus-visible {
+  outline: 2px solid var(--accent-selected);
+  outline-offset: 2px;
+}
+
+.seat-number {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.seat-berth {
+  font-size: 0.56rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.rail-seat.booked {
+  background: var(--bg-seat-booked);
+  border-left-color: var(--accent-booked);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.rail-seat.selected {
+  background: var(--accent-selected);
+  border-left-color: var(--accent-selected-deep);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+
+.rail-seat.selected .seat-berth {
+  color: #dbeafe;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .coach-wrapper { padding: 0.85rem; }
+  .railway-coach { overflow-x: auto; }
+  .rail-seat, .seat-placeholder { width: 46px; height: 46px; }
+  .seat-number { font-size: 0.76rem; }
+  .coach-legend { font-size: 0.68rem; gap: 0.6rem; }
+}

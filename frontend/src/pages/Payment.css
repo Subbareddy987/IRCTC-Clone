@@ -1,0 +1,477 @@
+/* ============================================================
+   Payment.css — IRCTC Secure Payment
+   Consistent with BookingDetails + SeatSelection design system
+   ============================================================ */
+
+/* --- Page Shell --- */
+.py-page {
+  min-height: 100vh;
+  background: #f0f4f8;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  padding: 36px 20px 60px;
+}
+
+.py-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* --- Page Header --- */
+.py-page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.py-lock-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.py-page-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #1a2744;
+  margin: 0 0 3px;
+  letter-spacing: -0.4px;
+}
+
+.py-page-sub {
+  font-size: 0.82rem;
+  color: #7a8599;
+  margin: 0;
+}
+
+/* --- Step Strip --- */
+.py-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.py-step {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 100px;
+  color: #9aa3b5;
+  background: #e8ecf2;
+}
+
+.py-step--done {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.py-step--active {
+  background: linear-gradient(135deg, #1a2744 0%, #1e40af 100%);
+  color: #fff;
+}
+
+.py-step-arrow {
+  color: #c4cad6;
+  font-size: 1.1rem;
+  font-weight: 300;
+}
+
+/* --- Two-column grid --- */
+.py-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  align-items: start;
+}
+
+.py-left,
+.py-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- Card Base --- */
+.py-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.py-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #f0f2f7;
+}
+
+.py-card-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.py-card-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9aa3b5;
+  margin: 0;
+}
+
+/* --- Journey Detail Grid --- */
+.py-detail-grid {
+  padding: 8px 0 4px;
+}
+
+.py-detail-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 24px;
+  border-bottom: 1px solid #f5f7fa;
+  gap: 16px;
+}
+
+.py-detail-item:last-child {
+  border-bottom: none;
+}
+
+.py-detail-label {
+  font-size: 0.82rem;
+  color: #7a8599;
+  white-space: nowrap;
+}
+
+.py-detail-val {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1a2744;
+  text-align: right;
+}
+
+.py-mono {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.88rem;
+  color: #1e40af;
+  letter-spacing: 0.3px;
+}
+
+.py-coach-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.4px;
+}
+
+/* --- Passengers --- */
+.py-pax-list {
+  padding: 12px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.py-pax-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f7f9fc;
+  border: 1px solid #e8ecf2;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.py-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.py-pax-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.py-pax-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a2744;
+  margin: 0 0 2px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.py-pax-meta {
+  font-size: 0.76rem;
+  color: #9aa3b5;
+  margin: 0;
+}
+
+.py-pax-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.py-seat-code {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #1e40af;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.py-berth {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #9aa3b5;
+  background: #e8ecf2;
+  padding: 2px 7px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Fare Card --- */
+.py-fare-rows {
+  padding: 8px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.py-fare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  border-bottom: 1px solid #f5f7fa;
+}
+
+.py-fare-row:last-child {
+  border-bottom: none;
+}
+
+.py-fare-row--sub {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  padding: 4px 0;
+  border-bottom: none;
+}
+
+.py-fare-divider {
+  height: 2px;
+  background: #e8ecf2;
+  margin: 6px 0;
+  border-radius: 1px;
+}
+
+.py-fare-total {
+  padding-top: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a2744;
+}
+
+.py-total-amount {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1a2744;
+  letter-spacing: -0.5px;
+}
+
+/* --- UPI / QR Card --- */
+.py-qr-wrap {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.py-qr-frame {
+  background: #fff;
+  border: 3px solid #1e40af;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
+}
+
+.py-qr-hint {
+  font-size: 0.78rem;
+  color: #7a8599;
+  text-align: center;
+  margin: 0;
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+.py-upi-apps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.py-upi-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+/* --- Pay Button --- */
+.py-pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 17px 24px;
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  letter-spacing: 0.2px;
+}
+
+.py-pay-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(22, 163, 74, 0.45);
+}
+
+.py-pay-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.py-pay-btn--loading {
+  background: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.py-btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(148, 163, 184, 0.3);
+  border-top-color: #64748b;
+  border-radius: 50%;
+  animation: py-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes py-spin {
+  to { transform: rotate(360deg); }
+}
+
+.py-secure-note {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #9aa3b5;
+  margin: 0;
+}
+
+/* --- Invalid State --- */
+.py-invalid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.py-invalid-icon {
+  font-size: 3rem;
+}
+
+.py-invalid h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1a2744;
+  margin: 0;
+}
+
+.py-invalid p {
+  color: #7a8599;
+  font-size: 0.88rem;
+  margin: 0 0 8px;
+}
+
+.py-back-btn {
+  background: linear-gradient(135deg, #1a2744 0%, #1e40af 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 24px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* --- Responsive --- */
+@media (max-width: 780px) {
+  .py-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .py-right {
+    order: -1;
+  }
+
+  .py-page-title {
+    font-size: 1.35rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .py-page {
+    padding: 20px 12px 40px;
+  }
+
+  .py-card-head {
+    padding: 14px 18px 12px;
+  }
+
+  .py-detail-item {
+    padding: 11px 18px;
+  }
+
+  .py-fare-rows {
+    padding: 6px 18px 14px;
+  }
+
+  .py-pax-list {
+    padding: 10px 14px 14px;
+  }
+}

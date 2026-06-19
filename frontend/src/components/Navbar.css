@@ -1,0 +1,297 @@
+/* ============================================================
+   Navbar — IRCTC Rail Booking
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700&display=swap');
+
+/* ── Shell ── */
+.nb {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #0d1b3e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-family: 'Inter', sans-serif;
+}
+
+.nb__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+/* ── Logo ── */
+.nb__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nb__logo-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.nb__logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.nb__logo-text strong {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ff8c3a;
+  letter-spacing: 0.04em;
+}
+
+.nb__logo-text em {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Nav links ── */
+.nb__links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.nb__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.nb__link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.nb__link--active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nb__link--active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: #ff8c3a;
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Right side ── */
+.nb__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── User chip ── */
+.nb__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nb__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2451ff, #1a3ed4);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.05em;
+}
+
+.nb__username {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Logout button ── */
+.nb__logout {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  background: rgba(255, 107, 0, 0.08);
+  color: #ff8c3a;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.nb__logout:hover {
+  background: rgba(255, 107, 0, 0.2);
+  border-color: #ff8c3a;
+  color: #ffb347;
+}
+
+/* ── Sign In button (logged-out state) ── */
+.nb__login-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  background: #2451ff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.nb__login-btn:hover {
+  background: #3561ff;
+  transform: translateY(-1px);
+}
+
+/* ── Hamburger (mobile) ── */
+.nb__ham {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-left: auto;
+  transition: background 0.15s;
+}
+
+.nb__ham:hover { background: rgba(255, 255, 255, 0.08); }
+
+.nb__ham span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+  transform-origin: center;
+}
+
+.nb__ham--open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nb__ham--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nb__ham--open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── Mobile drawer ── */
+.nb__drawer {
+  display: none;
+  flex-direction: column;
+  background: #0d1b3e;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 8px 16px 16px;
+  gap: 2px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.nb__drawer--open {
+  max-height: 400px;
+}
+
+.nb__drawer-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.nb__drawer-link:hover,
+.nb__drawer-link--active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nb__drawer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.nb__drawer-user {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.nb__logout--mobile {
+  font-size: 13px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .nb__links,
+  .nb__right {
+    display: none;
+  }
+
+  .nb__ham {
+    display: flex;
+  }
+
+  .nb__drawer {
+    display: flex;
+  }
+
+  .nb__inner {
+    gap: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .nb__logo-text em { display: none; }
+}

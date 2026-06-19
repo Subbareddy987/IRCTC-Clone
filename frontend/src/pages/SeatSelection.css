@@ -1,0 +1,633 @@
+/* ============================================================
+   SeatSelection.css — IRCTC Seat Selection
+   Consistent with BookingDetails.css design system
+   ============================================================ */
+
+/* --- Page Shell --- */
+.ss-page {
+  min-height: 100vh;
+  background: #f0f4f8;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header Banner ── */
+.ss-header {
+  background: linear-gradient(135deg, #1a2744 0%, #1e3a8a 60%, #1d4ed8 100%);
+  padding: 20px 32px;
+  box-shadow: 0 4px 20px rgba(26, 39, 68, 0.3);
+}
+
+.ss-header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ss-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ss-train-badge {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #fbbf24;
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: "Courier New", Courier, monospace;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.ss-train-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: -0.2px;
+}
+
+.ss-route-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.ss-route-strip span {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ss-route-strip strong {
+  color: #fbbf24;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+}
+
+.ss-route-strip em {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.ss-route-strip b {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ss-train-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+  flex-wrap: wrap;
+}
+
+.ss-meta-sep {
+  opacity: 0.4;
+}
+
+.ss-meta-done {
+  color: #86efac;
+  font-weight: 600;
+}
+
+/* Progress Ring */
+.ss-progress-ring-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.ss-progress-ring {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+
+.ss-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 4;
+}
+
+.ss-ring-fill {
+  fill: none;
+  stroke: #4ade80;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.4s ease;
+}
+
+.ss-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ── Body Layout ── */
+.ss-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 24px 32px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: start;
+}
+
+/* ── Panel Shared ── */
+.ss-coach-panel,
+.ss-passenger-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.07);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f0f2f7;
+  gap: 12px;
+}
+
+.ss-panel-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9aa3b5;
+  margin: 0;
+}
+
+/* ── Legend ── */
+.ss-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: #7a8599;
+  font-weight: 500;
+}
+
+.ss-legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.ss-dot-available { background: #22c55e; }
+.ss-dot-selected  { background: #3b82f6; }
+.ss-dot-booked    { background: #ef4444; }
+
+/* ── Coach Wrap ── */
+.ss-coach-wrap {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(100vh - 300px);
+  min-height: 300px;
+}
+
+.ss-coach-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: #9aa3b5;
+  font-size: 0.88rem;
+}
+
+.ss-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e8ecf2;
+  border-top-color: #1e40af;
+  border-radius: 50%;
+  animation: ss-spin 0.8s linear infinite;
+}
+
+@keyframes ss-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Coach Notice */
+.ss-coach-notice {
+  margin: 0;
+  padding: 12px 20px;
+  background: #fffbeb;
+  border-top: 1px solid #fde68a;
+  font-size: 0.76rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* ── Add Passenger Button ── */
+.ss-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #1a2744 0%, #1e40af 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.ss-add-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.ss-add-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Passenger List ── */
+.ss-passenger-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 340px);
+}
+
+/* ── Passenger Card ── */
+.ss-pax-card {
+  border: 1.5px solid #e8ecf2;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  background: #fafbfd;
+  overflow: hidden;
+}
+
+.ss-pax-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 2px 12px rgba(30, 64, 175, 0.08);
+}
+
+.ss-pax-active {
+  border-color: #1e40af !important;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1) !important;
+  background: #fff !important;
+}
+
+/* Card Top Bar */
+.ss-pax-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f0f4f8;
+  border-bottom: 1px solid #e8ecf2;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ss-pax-active .ss-pax-bar {
+  background: #eff6ff;
+  border-bottom-color: #bfdbfe;
+}
+
+.ss-pax-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ss-pax-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ss-pax-num {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1a2744;
+}
+
+.ss-seat-tag {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+
+.ss-seat-tag--filled {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.ss-seat-tag--filled em {
+  font-style: normal;
+  opacity: 0.7;
+}
+
+.ss-seat-tag--empty {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+/* Icon Buttons */
+.ss-icon-btn {
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: opacity 0.15s;
+}
+
+.ss-clear-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ss-clear-btn:hover {
+  background: #fecaca;
+}
+
+.ss-remove-btn {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.ss-remove-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.ss-remove-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Passenger Form */
+.ss-pax-form {
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ss-form-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.ss-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ss-form-grow { flex: 1; }
+.ss-form-age  { width: 80px; flex-shrink: 0; }
+
+.ss-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9aa3b5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ss-required { color: #ef4444; }
+
+.ss-input,
+.ss-select {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  color: #1a2744;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.ss-input:focus,
+.ss-select:focus {
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.ss-input--error {
+  border-color: #f87171;
+  background: #fff5f5;
+}
+
+.ss-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+.ss-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aa3b5' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* Seat Hint */
+.ss-seat-hint {
+  background: #eff6ff;
+  border: 1px dashed #93c5fd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+/* ── Summary Footer ── */
+.ss-summary {
+  padding: 16px 20px;
+  border-top: 1px solid #f0f2f7;
+  background: #fafbfd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ss-summary-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ss-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.ss-stat-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a2744;
+  line-height: 1;
+}
+
+.ss-stat-val--green  { color: #16a34a; }
+.ss-stat-val--orange { color: #d97706; }
+
+.ss-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #9aa3b5;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ss-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: #e2e8f0;
+}
+
+/* Proceed Button */
+.ss-proceed-btn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.ss-proceed-btn--ready {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+}
+
+.ss-proceed-btn--ready:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+}
+
+.ss-proceed-btn--waiting {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ss-body {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .ss-coach-wrap,
+  .ss-passenger-list {
+    max-height: none;
+  }
+
+  .ss-header {
+    padding: 16px 20px;
+  }
+
+  .ss-train-name {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .ss-header-inner {
+    align-items: flex-start;
+  }
+
+  .ss-header-left {
+    align-items: flex-start;
+  }
+
+  .ss-route-strip {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ss-route-strip b {
+    display: none;
+  }
+
+  .ss-train-meta {
+    font-size: 0.75rem;
+  }
+
+  .ss-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ss-proceed-btn {
+    text-align: center;
+    width: 100%;
+  }
+
+  .ss-form-row {
+    flex-direction: column;
+  }
+
+  .ss-form-age {
+    width: 100%;
+  }
+}
