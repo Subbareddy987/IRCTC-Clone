@@ -22,6 +22,7 @@ function Navbar() {
     { to: "/trains/search", label: "Search Trains" },
     { to: "/mybookings", label: "My Bookings" },
     { to: "/pnr-search", label: "PNR Status" },
+    { to: "/about-developer", label: "Developer" },
   ];
 
   const initials = user?.name
