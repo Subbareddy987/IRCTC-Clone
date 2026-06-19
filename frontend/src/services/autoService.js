@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://localhost:4500/api";
+const API_URL = "https://irctc-backend-r0p7.onrender.com/api";
 export const registeruser = async (userdata) => {
   const response = await axios.post(`${API_URL}/auth/register`, userdata);
   return response.data;
