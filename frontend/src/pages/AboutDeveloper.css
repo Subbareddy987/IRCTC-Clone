@@ -220,3 +220,32 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .dev-hero h1 {
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  .dev-lead {
+    font-size: 16px;
+  }
+
+  .dev-profile {
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .dev-profile__avatar {
+    width: 58px;
+    height: 58px;
+  }
+
+  .dev-story {
+    padding: 22px;
+  }
+
+  .dev-story h2 {
+    font-size: 24px;
+  }
+}

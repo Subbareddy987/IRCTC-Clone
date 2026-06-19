@@ -76,7 +76,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 8px 11px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
@@ -273,7 +273,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   .nb__links,
   .nb__right {
     display: none;
@@ -289,9 +289,19 @@
 
   .nb__inner {
     gap: 0;
+    padding: 0 16px;
   }
 }
 
 @media (max-width: 480px) {
   .nb__logo-text em { display: none; }
+
+  .nb__logo img {
+    width: 54px !important;
+    height: 32px !important;
+  }
+
+  .nb__logo-text strong {
+    font-size: 14px;
+  }
 }

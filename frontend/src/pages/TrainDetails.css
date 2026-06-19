@@ -607,6 +607,10 @@
 
 /* Mobile: single-column, track moves to left side */
 @media (max-width: 560px) {
+  .td-page {
+    background: #071326;
+  }
+
   .td-track-spine {
     left: 22px;
     transform: none;
@@ -665,7 +669,20 @@
 
   .td-banner { min-height: 320px; padding: 70px 16px 48px; }
   .td-train-number { font-size: 3rem; }
-  .td-route-section { padding: 40px 12px 60px; }
+  .td-route-section { padding: 36px 10px 56px; }
+  .td-route-header { margin-bottom: 34px; }
+  .td-stop,
+  .td-stop-left,
+  .td-stop-right {
+    min-height: 0;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .td-meta-pill {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Reduced motion */

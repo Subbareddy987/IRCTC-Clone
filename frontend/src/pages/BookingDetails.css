@@ -450,6 +450,14 @@
 
 /* --- Responsive --- */
 @media (max-width: 520px) {
+  .bd-page {
+    padding: 18px 10px 36px;
+  }
+
+  .bd-card {
+    border-radius: 14px;
+  }
+
   .bd-header {
     flex-direction: column;
     align-items: flex-start;
@@ -491,6 +499,14 @@
   .bd-btn-cancel,
   .bd-btn-back {
     min-width: unset;
+  }
+
+  .bd-passenger {
+    align-items: flex-start;
+  }
+
+  .bd-seat {
+    align-items: flex-start;
   }
 
   .bd-tear-line {

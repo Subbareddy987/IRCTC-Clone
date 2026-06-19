@@ -584,13 +584,44 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 400px) {
+@media (max-width: 520px) {
+  .av-hero {
+    padding: 42px 14px 34px;
+  }
+
+  .av-body {
+    padding: 0 10px 44px;
+  }
+
   .av-progress {
-    gap: 5px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
     padding: 10px;
   }
+
+  .av-progress-line {
+    width: 20px;
+    flex: 0 0 20px;
+  }
+
   .av-progress-step { font-size: 0.56rem; }
-  .av-ticket { padding: 18px 24px; }
+
+  .av-ticket {
+    padding: 18px 22px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .av-ticket-station,
+  .av-ticket-station-right {
+    align-items: flex-start;
+  }
+
+  .av-ticket-mid {
+    width: 100%;
+  }
+
   .av-ticket-code { font-size: 1.3rem; }
   .av-coach-grid { grid-template-columns: repeat(2, 1fr); }
   .av-stats-grid { grid-template-columns: repeat(3, 1fr); }

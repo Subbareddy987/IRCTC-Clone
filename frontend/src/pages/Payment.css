@@ -459,6 +459,20 @@
     padding: 20px 12px 40px;
   }
 
+  .py-page-header {
+    align-items: flex-start;
+  }
+
+  .py-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .py-step-arrow {
+    display: none;
+  }
+
   .py-card-head {
     padding: 14px 18px 12px;
   }
@@ -473,5 +487,13 @@
 
   .py-pax-list {
     padding: 10px 14px 14px;
+  }
+
+  .py-pax-row {
+    align-items: flex-start;
+  }
+
+  .py-pax-seat {
+    align-items: flex-start;
   }
 }

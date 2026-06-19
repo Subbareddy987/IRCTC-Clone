@@ -603,6 +603,21 @@
    RESPONSIVE
    ============================================================ */
 @media (max-width: 700px) {
+  .hero {
+    min-height: auto;
+    padding: 44px 12px 52px;
+  }
+
+  .hero-inner {
+    gap: 24px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    padding: 5px 10px;
+  }
+
   .station-row { grid-template-columns: 1fr; gap: 10px; }
 
   .swap-btn {
@@ -617,15 +632,36 @@
 
   .booking-card { padding: 20px 16px 18px; border-radius: 14px; }
 
-  .hero { padding: 70px 12px 60px; }
+  .st-input {
+    padding-right: 58px;
+  }
+
+  .results {
+    padding: 34px 12px 44px;
+  }
 }
 
 @media (max-width: 480px) {
   .hero-title { font-size: 2rem; }
+  .hero-sub { font-size: 0.92rem; }
 
-  .train-card { flex-wrap: wrap; gap: 12px; padding: 14px; }
+  .train-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+  }
 
-  .train-number-badge { min-width: 54px; font-size: 0.75rem; }
+  .train-number-badge {
+    width: fit-content;
+    min-width: 54px;
+    font-size: 0.75rem;
+  }
+
+  .train-route-row {
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
 
   .details-btn { width: 100%; justify-content: center; padding: 11px; }
 

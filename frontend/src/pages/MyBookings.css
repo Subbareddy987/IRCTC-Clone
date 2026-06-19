@@ -395,6 +395,8 @@
 @media (max-width: 640px) {
   .mb-page { padding: 20px 12px 40px; }
   .mb-page-header { flex-direction: column; }
+  .mb-stats { width: 100%; }
+  .mb-stat { flex: 1; }
   .mb-card { flex-direction: column; }
   .mb-date-strip {
     width: 100%; flex-direction: row;
