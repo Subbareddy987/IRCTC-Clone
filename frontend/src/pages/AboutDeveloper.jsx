@@ -1,6 +1,24 @@
 import "./AboutDeveloper.css";
 
 function AboutDeveloper() {
+  const contacts = [
+    {
+      label: "Email",
+      value: "kambamsubbareddy987@gmail.com",
+      href: "mailto:kambamsubbareddy987@gmail.com",
+    },
+    {
+      label: "LinkedIn",
+      value: "kambam-venkata-subba-reddy",
+      href: "https://www.linkedin.com/in/kambam-venkata-subba-reddy-965a00300/",
+    },
+    {
+      label: "Instagram",
+      value: "@subbuuu_18",
+      href: "https://www.instagram.com/subbuuu_18/",
+    },
+  ];
+
   const highlights = [
     {
       label: "Role",
@@ -40,7 +58,9 @@ function AboutDeveloper() {
         </div>
 
         <div className="dev-profile">
-          <div className="dev-profile__avatar">KS</div>
+          <div className="dev-profile__avatar">
+            <img src="/favicon.svg" alt="Kambam Subba Reddy" />
+          </div>
           <div>
             <span className="dev-profile__label">Developer</span>
             <strong>Kambam Subba Reddy</strong>
@@ -72,6 +92,24 @@ function AboutDeveloper() {
           The backend is connected to PostgreSQL so trains, routes, seats,
           bookings and users are stored as real application data.
         </p>
+      </section>
+
+      <section className="dev-section">
+        <p className="dev-section-label">Contact</p>
+        <div className="dev-contact-grid">
+          {contacts.map((contact) => (
+            <a
+              className="dev-contact-card"
+              href={contact.href}
+              key={contact.label}
+              target={contact.href.startsWith("http") ? "_blank" : undefined}
+              rel={contact.href.startsWith("http") ? "noreferrer" : undefined}
+            >
+              <span>{contact.label}</span>
+              <strong>{contact.value}</strong>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section className="dev-section">
