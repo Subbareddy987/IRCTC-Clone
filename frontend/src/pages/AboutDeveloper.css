@@ -73,9 +73,9 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: 32% 34%;
-  transform: scale(2.7);
-  transform-origin: 32% 34%;
+  object-position: 28% 48%;
+  transform: scale(1.8);
+  transform-origin: 28% 48%;
 }
 
 .dev-profile strong {
