@@ -1,4 +1,4 @@
-import "./SleeperCoach.css";
+import "./Sleepercoach.css";
 
 function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSeat }) {
   const selectedSeatIds = new Set(
