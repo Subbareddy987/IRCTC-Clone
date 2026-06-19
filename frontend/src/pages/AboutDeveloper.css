@@ -59,12 +59,12 @@
 }
 
 .dev-profile__avatar {
-  width: 74px;
-  height: 74px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
   overflow: hidden;
   background: #ffffff;
-  border: 3px solid rgba(255, 140, 58, 0.95);
+  border: 4px solid #ff8c3a;
   flex: 0 0 auto;
 }
 
@@ -72,7 +72,10 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: center top;
+  object-fit: cover;
+  object-position: 32% 34%;
+  transform: scale(2.7);
+  transform-origin: 32% 34%;
 }
 
 .dev-profile strong {
