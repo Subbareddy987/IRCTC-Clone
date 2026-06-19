@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import jwt from "jsonwebtoken";
 import { verifytoken } from "../src/middleware/authMiddleware.js";
 
-process.env.jwt_secret = "test-secret";
+process.env.JWT_SECRET = "test-secret";
 
 const runMiddleware = (authorization) => {
   const req = { headers: { authorization } };
@@ -34,7 +34,7 @@ test("rejects missing and malformed bearer tokens", () => {
 });
 
 test("accepts a valid bearer token", () => {
-  const token = jwt.sign({ user_id: 42 }, process.env.jwt_secret, {
+  const token = jwt.sign({ user_id: 42 }, process.env.JWT_SECRET, {
     expiresIn: "5m",
   });
   const result = runMiddleware(`Bearer ${token}`);
@@ -46,7 +46,7 @@ test("accepts a valid bearer token", () => {
 test("returns a specific response for expired tokens", () => {
   const token = jwt.sign(
     { user_id: 42, exp: Math.floor(Date.now() / 1000) - 1 },
-    process.env.jwt_secret,
+    process.env.JWT_SECRET,
   );
   const result = runMiddleware(`Bearer ${token}`);
 

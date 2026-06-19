@@ -6,6 +6,7 @@ import {
   CreateUser,
 } from "../models/userModel.js";
 import { validateLogin, validateRegistration } from "../utils/authValidation.js";
+import { getJwtSecret } from "../config/env.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -23,12 +24,16 @@ export const registerUser = async (req, res) => {
     }
     const hashedpassword = await bcrypt.hash(password, 10);
     const user = await CreateUser(full_name, email, hashedpassword);
+    const secret = getJwtSecret();
+    if (!secret) {
+      throw new Error("JWT_SECRET is not configured");
+    }
     const token = jwt.sign(
       {
         user_id: user.user_id,
         email: user.email,
       },
-      process.env.JWT_SECRET,
+      secret,
       {
         expiresIn: "1d",
       },
@@ -78,12 +83,16 @@ export const loginUser = async (req, res) => {
         message: "Invalid email or password",
       });
     }
+    const secret = getJwtSecret();
+    if (!secret) {
+      throw new Error("JWT_SECRET is not configured");
+    }
     const token = jwt.sign(
       {
         user_id: user.user_id,
         email: user.email,
       },
-      process.env.JWT_SECRET,
+      secret,
       {
         expiresIn: "1d",
       },

@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "db:setup": "node scripts/setupDatabase.js",
     "test": "node --test"
   },
   "keywords": [],

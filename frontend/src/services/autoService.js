@@ -1,5 +1,6 @@
 import axios from "axios";
-const API_URL = "https://irctc-backend-r0p7.onrender.com/api";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://irctc-backend-r0p7.onrender.com/api";
 export const registeruser = async (userdata) => {
   const response = await axios.post(`${API_URL}/auth/register`, userdata);
   return response.data;

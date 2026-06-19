@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../config/env.js";
+
 export const verifytoken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const [scheme, token] = authHeader?.trim().split(/\s+/) ?? [];
@@ -11,7 +13,11 @@ export const verifytoken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.jwt_secret);
+    const secret = getJwtSecret();
+    if (!secret) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     return next();
   } catch (error) {
