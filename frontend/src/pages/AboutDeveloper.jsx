@@ -4,7 +4,7 @@ function AboutDeveloper() {
   const contacts = [
     {
       label: "Email",
-      value: "kambamsubbareddy987@gmail.com",
+      value: "kambamsubbareddy987@gmail.com", 
       href: "mailto:kambamsubbareddy987@gmail.com",
     },
     {
