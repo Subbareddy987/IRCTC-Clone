@@ -168,6 +168,13 @@ function SeatSelection() {
 
   const seatsSelected = passengers.filter((p) => p.seat_id).length;
   const allSeatsSelected = seatsSelected === passengers.length;
+  const normalizedCoachType = (() => {
+    const value = (coach_type || "").toLowerCase();
+    if (value.includes("sleeper")) return "Sleeper";
+    if (value === "3a" || value.includes("3 tier")) return "3A";
+    if (value === "2a" || value.includes("2 tier") || value.includes("first")) return "2A";
+    return coach_type;
+  })();
   const formattedDate = travel_date
     ? new Date(travel_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
     : "N/A";
@@ -237,9 +244,14 @@ function SeatSelection() {
               </div>
             ) : (
               <>
-                {coach_type === "2A" && <A1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
-                {coach_type === "3A" && <B1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
-                {coach_type === "Sleeper" && <SleeperCoach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
+                {normalizedCoachType === "2A" && <A1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
+                {normalizedCoachType === "3A" && <B1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
+                {normalizedCoachType === "Sleeper" && <SleeperCoach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
+                {!["2A", "3A", "Sleeper"].includes(normalizedCoachType) && (
+                  <div className="ss-coach-loading">
+                    <p>No seat layout is available for {coach_type || "this coach type"}.</p>
+                  </div>
+                )}
               </>
             )}
           </div>

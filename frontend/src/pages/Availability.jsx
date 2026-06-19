@@ -29,13 +29,25 @@ function Availability() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const normalizeCoachType = (coachType = "") => {
+      const value = coachType.toLowerCase();
+      if (value.includes("sleeper")) return "Sleeper";
+      if (value === "3a" || value.includes("3 tier")) return "3A";
+      if (value === "2a" || value.includes("2 tier") || value.includes("first")) return "2A";
+      return coachType;
+    };
+
     async function loadCoaches() {
       try {
         const response = await getTrainCoaches(train_id);
         const coachList = response.coaches || [];
         setCoaches(coachList);
         setSelectedCoach(
-          coachList.find((coach) => coach.coach_type === preferredClass) ||
+          coachList.find(
+            (coach) =>
+              normalizeCoachType(coach.coach_type) ===
+              normalizeCoachType(preferredClass),
+          ) ||
             coachList[0] ||
             null,
         );
