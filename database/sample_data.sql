@@ -57,6 +57,22 @@ SET train_name = EXCLUDED.train_name,
     arrival_time = EXCLUDED.arrival_time,
     total_distance = EXCLUDED.total_distance;
 
+DELETE FROM train_routes
+WHERE train_id IN (
+  SELECT train_id
+  FROM trains
+  WHERE train_number IN (
+    '12704',
+    '12760',
+    '12711',
+    '20805',
+    '12007',
+    '17230',
+    '12839',
+    '11020'
+  )
+);
+
 INSERT INTO train_routes (
   train_id,
   station_id,
