@@ -59,7 +59,7 @@ function AboutDeveloper() {
 
         <div className="dev-profile">
           <div className="dev-profile__avatar">
-            <img src="/favicon.svg" alt="Kambam Subba Reddy" />
+            <img src="/developer-photo.jpeg" alt="Kambam Subba Reddy" />
           </div>
           <div>
             <span className="dev-profile__label">Developer</span>
