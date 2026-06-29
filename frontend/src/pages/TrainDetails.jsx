@@ -4,6 +4,18 @@ import { getTraindetails } from "../services/autoService";
 import "./TrainDetails.css";
 
 const stationImages = {
+  NRT: {
+    image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=700&q=80",
+    place: "Narasaraopet Town Stop",
+    desc: "A Palnadu region stop known for education, markets and road links into nearby rural communities.",
+    highlight: "Town Stop",
+  },
+  DKD: {
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=700&q=80",
+    place: "Donakonda Rail Halt",
+    desc: "A quiet Prakasam district halt serving local passengers and connecting interior towns along the route.",
+    highlight: "Passenger Halt",
+  },
   SC: {
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80",
     place: "Modern Express Service",
@@ -255,9 +267,7 @@ function TrainDetails() {
                       </div>
                       <h3 className="td-station-name">{station.station_name}</h3>
                       <h4 className="td-place-name">{place.place}</h4>
-                      <p className="td-place-desc">
-                        Train-focused stop information for this selected journey segment.
-                      </p>
+                      <p className="td-place-desc">{place.desc}</p>
                     </div>
                   </div>
                 </div>
