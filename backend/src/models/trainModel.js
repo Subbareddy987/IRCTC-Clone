@@ -55,8 +55,8 @@ export const searchTrains = async (Scode, Dcode) => {
     s2.station_name AS selected_destination_name,
     tr_source.stop_order AS source_stop_order,
     tr_dest.stop_order AS destination_stop_order,
-    tr_source.departure_time AS selected_departure_time,
-    tr_dest.arrival_time AS selected_arrival_time
+    COALESCE(tr_source.departure_time, t.departure_time) AS selected_departure_time,
+    COALESCE(tr_dest.arrival_time, t.arrival_time) AS selected_arrival_time
 FROM trains t
 JOIN train_routes tr_source
     ON t.train_id = tr_source.train_id
