@@ -554,6 +554,41 @@
 
 .route-arrow { color: rgba(168,184,204,0.4); display: flex; align-items: center; flex-shrink: 0; }
 
+.train-time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.train-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 92px;
+}
+
+.train-time span {
+  color: rgba(168, 184, 204, 0.72);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.train-time strong {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.train-time-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .train-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 
 .tag {
@@ -661,6 +696,15 @@
   .train-route-row {
     overflow-x: auto;
     padding-bottom: 2px;
+  }
+
+  .train-time-row {
+    gap: 10px;
+  }
+
+  .train-time {
+    min-width: 0;
+    flex: 1;
   }
 
   .details-btn { width: 100%; justify-content: center; padding: 11px; }

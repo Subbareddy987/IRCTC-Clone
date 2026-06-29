@@ -94,6 +94,20 @@ function StationInput({ label, value, onChange, placeholder,stations }) {
   );
 }
 
+function formatTrainTime(time) {
+  if (!time) return "N/A";
+
+  const [hours = "00", minutes = "00"] = String(time).split(":");
+  const date = new Date();
+  date.setHours(Number(hours), Number(minutes), 0, 0);
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 function Searchtrain() {
   const [source, setSource] = useState({ code: "", name: "" });
   const [destination, setDestination] = useState({ code: "", name: "" });
@@ -277,6 +291,17 @@ function Searchtrain() {
                         </svg>
                       </span>
                       <span className="route-station">{destination.code || destination.name}</span>
+                    </div>
+                    <div className="train-time-row" aria-label="Train timings">
+                      <div className="train-time">
+                        <span>Departure</span>
+                        <strong>{formatTrainTime(train.selected_departure_time)}</strong>
+                      </div>
+                      <div className="train-time-divider" />
+                      <div className="train-time">
+                        <span>Arrival</span>
+                        <strong>{formatTrainTime(train.selected_arrival_time)}</strong>
+                      </div>
                     </div>
                     <div className="train-tags">
                       <span className="tag">{coachType}</span>
