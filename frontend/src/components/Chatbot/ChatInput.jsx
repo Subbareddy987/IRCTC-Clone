@@ -51,8 +51,14 @@ const ChatInput = ({ message, setMessage, messages, setMessages }) => {
           if (e.key === "Enter") sendMessage();
         }}
       />
-      <button onClick={sendMessage} aria-label="Send message">
-        Go
+      <button
+        className="chat-send-btn"
+        onClick={sendMessage}
+        aria-label="Send message"
+      >
+        <span className="railway-send-icon" aria-hidden="true">
+          <span className="railway-track" />
+        </span>
       </button>
     </div>
   );
