@@ -64,8 +64,6 @@ function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSea
         </div>
       </header>
 
-     
-
       <div className="railway-coach">
         {bays.map((bay, index) => (
           <div key={index} className="coach-bay">

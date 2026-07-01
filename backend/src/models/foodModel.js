@@ -90,7 +90,7 @@ export const getFoodStationsForJourney = async (
 
 export const getStationFoodMenu = async (station_code) => {
   const stationMenuQuery = `
-    SELECT
+    SELECT DISTINCT ON (fi.food_name)
       sfm.menu_id,
       sfm.station_code,
       sfm.available_qty,
@@ -106,7 +106,7 @@ export const getStationFoodMenu = async (station_code) => {
     WHERE sfm.station_code = $1
       AND fi.is_available = true
       AND COALESCE(sfm.available_qty, 0) > 0
-    ORDER BY fi.category, fi.food_name;
+    ORDER BY fi.food_name, fi.food_id DESC;
   `;
 
   const stationMenuResult = await pool.query(stationMenuQuery, [station_code]);
@@ -116,7 +116,7 @@ export const getStationFoodMenu = async (station_code) => {
   }
 
   const globalMenuQuery = `
-    SELECT
+    SELECT DISTINCT ON (fi.food_name)
       NULL::integer AS menu_id,
       $1::varchar AS station_code,
       100 AS available_qty,
@@ -128,7 +128,7 @@ export const getStationFoodMenu = async (station_code) => {
       fi.is_available
     FROM food_items fi
     WHERE fi.is_available = true
-    ORDER BY fi.category, fi.food_name;
+    ORDER BY fi.food_name, fi.food_id DESC;
   `;
 
   const globalMenuResult = await pool.query(globalMenuQuery, [station_code]);

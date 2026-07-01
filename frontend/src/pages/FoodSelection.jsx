@@ -19,6 +19,18 @@ function FoodSelection() {
   const [loadingMenu, setLoadingMenu] = useState(false);
   const [cart, setCart] = useState({});
 
+  const loadStationMenu = async (stationCode) => {
+    const response = await getStationFoodMenu(stationCode);
+    const menu = response.menu || [];
+
+    setMenus((prev) => ({
+      ...prev,
+      [stationCode]: menu,
+    }));
+
+    return menu;
+  };
+
   useEffect(() => {
     async function loadStations() {
       if (!bookingData) return;
@@ -33,6 +45,13 @@ function FoodSelection() {
         const foodStations = response.stations || [];
         setStations(foodStations);
         setActiveStation(foodStations[0]?.station_code || null);
+
+        const preloadStations = foodStations.slice(0, 4);
+        Promise.allSettled(
+          preloadStations.map((station) =>
+            loadStationMenu(station.station_code),
+          ),
+        );
       } catch (error) {
         console.error(error);
         toast.error("Failed to load food stations");
@@ -50,11 +69,7 @@ function FoodSelection() {
 
       setLoadingMenu(true);
       try {
-        const response = await getStationFoodMenu(activeStation);
-        setMenus((prev) => ({
-          ...prev,
-          [activeStation]: response.menu || [],
-        }));
+        await loadStationMenu(activeStation);
       } catch (error) {
         console.error(error);
         toast.error("Failed to load station menu");

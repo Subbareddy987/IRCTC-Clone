@@ -71,10 +71,6 @@ function B1Coach({ coachName = "B1", seats = [], passengers = [], assignSeat }) 
         </div>
       </header>
 
-      
-
-     
-
       <div className="railway-coach">
         {bays.map((bay, index) => (
           <div key={index} className="coach-bay">

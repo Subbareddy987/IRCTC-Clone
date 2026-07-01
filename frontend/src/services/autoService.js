@@ -1,6 +1,25 @@
 import axios from "axios";
 const API_URL =
   import.meta.env.VITE_API_URL || "https://irctc-backend-r0p7.onrender.com/api";
+const FOOD_CACHE_KEY = "food_menu_cache_v1";
+const FOOD_CACHE_TTL_MS = 10 * 60 * 1000;
+
+const readFoodCache = () => {
+  try {
+    return JSON.parse(localStorage.getItem(FOOD_CACHE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+};
+
+const writeFoodCache = (cache) => {
+  try {
+    localStorage.setItem(FOOD_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Cache is optional. Ignore storage quota/private mode failures.
+  }
+};
+
 export const registeruser = async (userdata) => {
   const response = await axios.post(`${API_URL}/auth/register`, userdata);
   return response.data;
@@ -139,7 +158,21 @@ export const getFoodStationsForJourney = async (
 };
 
 export const getStationFoodMenu = async (station_code) => {
-  const response = await axios.get(`${API_URL}/food/menu/${station_code}`);
+  const stationCode = station_code.toUpperCase();
+  const cache = readFoodCache();
+  const cached = cache[stationCode];
+  const isFresh = cached && Date.now() - cached.savedAt < FOOD_CACHE_TTL_MS;
+
+  if (isFresh) {
+    return cached.data;
+  }
+
+  const response = await axios.get(`${API_URL}/food/menu/${stationCode}`);
+  cache[stationCode] = {
+    savedAt: Date.now(),
+    data: response.data,
+  };
+  writeFoodCache(cache);
 
   return response.data;
 };
