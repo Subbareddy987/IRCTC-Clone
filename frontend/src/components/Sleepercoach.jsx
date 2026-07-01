@@ -64,9 +64,7 @@ function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSea
         </div>
       </header>
 
-      <div className="coach-warning">
-        WARNING! Coach position may not be accurate for certain trains.
-      </div>
+     
 
       <div className="railway-coach">
         {bays.map((bay, index) => (
