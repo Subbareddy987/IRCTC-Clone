@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getStations, searchTrains } from "../services/autoService";
 import "./SearchTrain.css";
 import { toast } from "react-toastify";
@@ -21,6 +21,65 @@ function filterStations(query, stations = []) {
       code: s.station_code,
       name: s.station_name,
     }));
+}
+
+function normalizeStationText(value = "") {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const stationAliases = {
+  bangalore: ["bengaluru", "ksr bengaluru", "sbc"],
+  bengaluru: ["bangalore", "ksr bengaluru", "sbc"],
+  chennai: ["mgr chennai central", "chennai central", "mas"],
+  delhi: ["new delhi", "ndls"],
+  hyderabad: ["hyderabad deccan", "secunderabad", "hyb", "sc"],
+  mumbai: ["mumbai cst", "mumbai central", "csmt"],
+};
+
+function findStationFromQuery(query, stations = []) {
+  if (!query) return { code: "", name: "" };
+
+  const normalizedQuery = normalizeStationText(query);
+  const queryCandidates = [
+    normalizedQuery,
+    ...(stationAliases[normalizedQuery] || []).map(normalizeStationText),
+  ];
+  const exactMatch = stations.find(
+    (station) =>
+      queryCandidates.includes(normalizeStationText(station.station_code)) ||
+      queryCandidates.includes(normalizeStationText(station.station_name)),
+  );
+
+  if (exactMatch) {
+    return {
+      code: exactMatch.station_code,
+      name: exactMatch.station_name,
+    };
+  }
+
+  const partialMatch = stations.find(
+    (station) =>
+      queryCandidates.some((candidate) =>
+        normalizeStationText(station.station_name).includes(candidate),
+      ) ||
+      queryCandidates.some((candidate) =>
+        candidate.includes(normalizeStationText(station.station_code)),
+      ),
+  );
+
+  if (partialMatch) {
+    return {
+      code: partialMatch.station_code,
+      name: partialMatch.station_name,
+    };
+  }
+
+  return {
+    code: "",
+    name: query,
+  };
 }
 
 function StationInput({ label, value, onChange, placeholder,stations }) {
@@ -117,6 +176,7 @@ function Searchtrain() {
   const [loading, setLoading] = useState(false);
   const [stations, setStations] = useState([]);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
    useEffect(() => {
   async function loadStations() {
     try {
@@ -129,6 +189,31 @@ function Searchtrain() {
 
   loadStations();
 }, []);
+
+  useEffect(() => {
+    if (!stations.length) return;
+
+    const sourceQuery = searchParams.get("from") || searchParams.get("source");
+    const destinationQuery =
+      searchParams.get("to") || searchParams.get("destination");
+    const dateQuery = searchParams.get("date");
+
+    const prefillTimer = window.setTimeout(() => {
+      if (sourceQuery) {
+        setSource(findStationFromQuery(sourceQuery, stations));
+      }
+
+      if (destinationQuery) {
+        setDestination(findStationFromQuery(destinationQuery, stations));
+      }
+
+      if (dateQuery) {
+        setJourneyDate(dateQuery);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(prefillTimer);
+  }, [searchParams, stations]);
   const swapStations = () => {
     const temp = source;
     setSource(destination);
@@ -189,7 +274,7 @@ function Searchtrain() {
 
             <div className="station-row">
               <StationInput
-                key={`source-${source.code}`}
+                key={`source-${source.code}-${source.name}`}
                 label="From"
                 value={source}
                 onChange={setSource}
@@ -209,7 +294,7 @@ function Searchtrain() {
               </button>
 
               <StationInput
-                key={`destination-${destination.code}`}
+                key={`destination-${destination.code}-${destination.name}`}
                 label="To"
                 value={destination}
                 onChange={setDestination}

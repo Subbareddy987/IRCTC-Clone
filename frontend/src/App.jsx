@@ -15,12 +15,14 @@ import Payment from "./pages/Payment.jsx";
 import FoodSelection from "./pages/FoodSelection.jsx";
 import AboutDeveloper from "./pages/AboutDeveloper.jsx";
 import Navbar from "./components/Navbar.jsx";
+import ChatBot from "./components/Chatbot/ChatBot";
 import "./styles/global.css";
 function AppContent() {
   const location = useLocation();
 
   const hideNavbar =
     location.pathname === "/" || location.pathname === "/register";
+  const showChatBot = !hideNavbar && Boolean(localStorage.getItem("token"));
 
   return (
     <>
@@ -41,6 +43,7 @@ function AppContent() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/about-developer" element={<AboutDeveloper />} />
       </Routes>
+      {showChatBot && <ChatBot />}
     </>
   );
 }
