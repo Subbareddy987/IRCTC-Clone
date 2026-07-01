@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes.js";
 import trainRoutes from "./routes/trainRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import stationRoutes from "./routes/stationRoute.js";
+import foodRoutes from './routes/foodRoutes.js';
 import pool from "./config/db.js";
 const app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/trains", trainRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/stations", stationRoutes);
+app.use('/api/food',foodRoutes);
 app.get("/", (req, res) => {
   res.send("IRCTC Booking");
 });

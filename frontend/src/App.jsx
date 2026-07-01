@@ -12,6 +12,7 @@ import MyBookings from "./pages/MyBooking.jsx";
 import BookingDetails from "./pages/BookingDetails.jsx";
 import SearchPNR from "./pages/SearchPNR.jsx";
 import Payment from "./pages/Payment.jsx";
+import FoodSelection from "./pages/FoodSelection.jsx";
 import AboutDeveloper from "./pages/AboutDeveloper.jsx";
 import Navbar from "./components/Navbar.jsx";
 import "./styles/global.css";
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/mybookings" element={<MyBookings />} />
         <Route path="/booking/:booking_id" element={<BookingDetails />} />
         <Route path="/pnr-search" element={<SearchPNR />} />
+        <Route path="/food-selection" element={<FoodSelection />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/about-developer" element={<AboutDeveloper />} />
       </Routes>

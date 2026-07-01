@@ -17,6 +17,7 @@ export const addBooking = async (req, res) => {
       source_station_id,
       destination_station_id,
       passengers,
+      food_orders,
     } = req.body;
 
     if (!train_id || !travel_date || !source_station_id || !destination_station_id) {
@@ -63,6 +64,7 @@ export const addBooking = async (req, res) => {
       travel_date,
       pnr,
       passengers,
+      food_orders,
     );
 
     return res.status(200).json({

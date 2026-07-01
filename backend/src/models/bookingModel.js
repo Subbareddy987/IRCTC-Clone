@@ -7,6 +7,7 @@ export const createBooking = async (
   travel_date,
   pnr,
   passengers,
+  food_orders = [],
 ) => {
   const client = await pool.connect();
   try {
@@ -56,6 +57,17 @@ export const createBooking = async (
       ]);
     }
 
+    if (Array.isArray(food_orders) && food_orders.length > 0) {
+      await createFoodOrders(
+        client,
+        bookings.booking_id,
+        train_id,
+        source_station_id,
+        destination_station_id,
+        food_orders,
+      );
+    }
+
     await client.query("COMMIT");
     return bookings;
   } catch (error) {
@@ -66,6 +78,123 @@ export const createBooking = async (
     client.release();
   }
 };
+
+const createFoodOrders = async (
+  client,
+  booking_id,
+  train_id,
+  source_station_id,
+  destination_station_id,
+  food_orders,
+) => {
+  const stationResult = await client.query(
+    `
+      WITH selected_route AS (
+        SELECT
+          source_route.stop_order AS source_order,
+          destination_route.stop_order AS destination_order
+        FROM train_routes source_route
+        JOIN train_routes destination_route
+          ON destination_route.train_id = source_route.train_id
+        WHERE source_route.train_id = $1
+          AND source_route.station_id = $2
+          AND destination_route.station_id = $3
+          AND source_route.stop_order < destination_route.stop_order
+      )
+      SELECT DISTINCT s.station_code
+      FROM selected_route sr
+      JOIN train_routes tr
+        ON tr.train_id = $1
+       AND tr.stop_order > sr.source_order
+       AND tr.stop_order <= sr.destination_order
+      JOIN stations s
+        ON s.station_id = tr.station_id;
+    `,
+    [train_id, source_station_id, destination_station_id],
+  );
+
+  const allowedStations = new Set(
+    stationResult.rows.map((row) => row.station_code),
+  );
+
+  for (const order of food_orders) {
+    const deliveryStation = (
+      order.delivery_station ||
+      order.station_code ||
+      ""
+    ).toUpperCase();
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    if (!deliveryStation || items.length === 0) {
+      continue;
+    }
+
+    if (!allowedStations.has(deliveryStation)) {
+      throw new Error(
+        `Food delivery station ${deliveryStation} is not part of the journey`,
+      );
+    }
+
+    let totalAmount = 0;
+    const preparedItems = [];
+
+    for (const item of items) {
+      const foodId = Number(item.food_id);
+      const quantity = Number(item.quantity);
+
+      if (!Number.isInteger(foodId) || !Number.isInteger(quantity) || quantity < 1) {
+        throw new Error("Food item and quantity are required");
+      }
+
+      const menuResult = await client.query(
+        `
+          UPDATE station_food_menu sfm
+          SET available_qty = sfm.available_qty - $3
+          FROM food_items fi
+          WHERE sfm.food_id = fi.food_id
+            AND sfm.station_code = $1
+            AND sfm.food_id = $2
+            AND fi.is_available = true
+            AND sfm.available_qty >= $3
+          RETURNING fi.food_id, fi.price;
+        `,
+        [deliveryStation, foodId, quantity],
+      );
+
+      if (menuResult.rows.length === 0) {
+        throw new Error(
+          `Food item ${foodId} is unavailable at ${deliveryStation}`,
+        );
+      }
+
+      const price = Number(menuResult.rows[0].price);
+      totalAmount += price * quantity;
+      preparedItems.push({ food_id: foodId, quantity, price });
+    }
+
+    if (preparedItems.length === 0) {
+      continue;
+    }
+
+    const orderResult = await client.query(
+      `INSERT INTO food_orders(booking_id, delivery_station, total_amount, status)
+       VALUES($1, $2, $3, $4)
+       RETURNING food_order_id;`,
+      [booking_id, deliveryStation, totalAmount, "CONFIRMED"],
+    );
+
+    const foodOrderId = orderResult.rows[0].food_order_id;
+
+    for (const item of preparedItems) {
+      await client.query(
+        `INSERT INTO food_order_items(food_order_id, food_id, quantity, price)
+         VALUES($1, $2, $3, $4);`,
+        [foodOrderId, item.food_id, item.quantity, item.price],
+      );
+    }
+  }
+};
+
 export const getSeatsByTrain = async (train_id, travel_date, coach_name) => {
   const query = `
     SELECT

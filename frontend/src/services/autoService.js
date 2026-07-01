@@ -121,3 +121,25 @@ export const getStations = async () => {
 
   return response.data;
 };
+
+export const getFoodStationsForJourney = async (
+  train_id,
+  source_station_id,
+  destination_station_id,
+) => {
+  const response = await axios.get(`${API_URL}/food/stations`, {
+    params: {
+      train_id,
+      source_station_id,
+      destination_station_id,
+    },
+  });
+
+  return response.data;
+};
+
+export const getStationFoodMenu = async (station_code) => {
+  const response = await axios.get(`${API_URL}/food/menu/${station_code}`);
+
+  return response.data;
+};

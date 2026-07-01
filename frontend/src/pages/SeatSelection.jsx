@@ -132,7 +132,7 @@ function SeatSelection() {
       return;
     }
 
-    navigate("/payment", {
+    navigate("/food-selection", {
       state: {
         train_id,
         train_number: location.state?.train_number,

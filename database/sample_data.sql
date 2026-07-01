@@ -182,3 +182,68 @@ FROM coaches c
 CROSS JOIN LATERAL generate_series(1, c.total_seats) AS seat_number
 ON CONFLICT (coach_id, seat_number) DO UPDATE
 SET berth_type = EXCLUDED.berth_type;
+
+INSERT INTO food_items (food_name, category, price, image_url, is_available)
+SELECT food_name, category, price, image_url, true
+FROM (
+  VALUES
+    ('Veg Biryani', 'Meals', 120.00, NULL),
+    ('Chicken Biryani', 'Meals', 180.00, NULL),
+    ('South Indian Thali', 'Meals', 140.00, NULL),
+    ('Idli Sambar', 'Breakfast', 60.00, NULL),
+    ('Masala Dosa', 'Breakfast', 90.00, NULL),
+    ('Veg Sandwich', 'Snacks', 70.00, NULL),
+    ('Samosa', 'Snacks', 30.00, NULL),
+    ('Tea', 'Beverages', 15.00, NULL),
+    ('Coffee', 'Beverages', 25.00, NULL),
+    ('Water Bottle', 'Beverages', 20.00, NULL)
+) AS food(food_name, category, price, image_url)
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM food_items existing
+  WHERE existing.food_name = food.food_name
+);
+
+INSERT INTO station_food_menu (station_code, food_id, available_qty)
+SELECT station.station_code, item.food_id, menu.available_qty
+FROM (
+  VALUES
+    ('SC', 'Idli Sambar', 80),
+    ('SC', 'Masala Dosa', 60),
+    ('SC', 'Tea', 150),
+    ('SC', 'Coffee', 120),
+    ('KZJ', 'Veg Sandwich', 70),
+    ('KZJ', 'Samosa', 100),
+    ('KZJ', 'Tea', 120),
+    ('BZA', 'Veg Biryani', 120),
+    ('BZA', 'Chicken Biryani', 90),
+    ('BZA', 'South Indian Thali', 100),
+    ('BZA', 'Water Bottle', 200),
+    ('RJY', 'Veg Biryani', 70),
+    ('RJY', 'Samosa', 90),
+    ('OGL', 'South Indian Thali', 70),
+    ('OGL', 'Coffee', 100),
+    ('NLR', 'Veg Biryani', 80),
+    ('NLR', 'Water Bottle', 150),
+    ('GDR', 'Idli Sambar', 80),
+    ('GDR', 'Tea', 120),
+    ('MAS', 'South Indian Thali', 100),
+    ('MAS', 'Masala Dosa', 90),
+    ('MAS', 'Coffee', 150),
+    ('VSKP', 'Veg Biryani', 100),
+    ('VSKP', 'Chicken Biryani', 80),
+    ('NGP', 'Veg Sandwich', 80),
+    ('NGP', 'Tea', 150),
+    ('BPL', 'Samosa', 100),
+    ('BPL', 'Coffee', 100),
+    ('SBC', 'Masala Dosa', 100),
+    ('SBC', 'Coffee', 150),
+    ('PUNE', 'Veg Sandwich', 90),
+    ('PUNE', 'Water Bottle', 160)
+) AS menu(station_code, food_name, available_qty)
+JOIN stations station
+  ON station.station_code = menu.station_code
+JOIN food_items item
+  ON item.food_name = menu.food_name
+ON CONFLICT (station_code, food_id) DO UPDATE
+SET available_qty = EXCLUDED.available_qty;

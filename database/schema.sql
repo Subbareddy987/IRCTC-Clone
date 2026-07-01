@@ -83,6 +83,40 @@ CREATE TABLE IF NOT EXISTS booked_seats (
   UNIQUE (seat_id, train_id, travel_date)
 );
 
+CREATE TABLE IF NOT EXISTS food_items (
+  food_id SERIAL PRIMARY KEY,
+  food_name VARCHAR(120) NOT NULL,
+  category VARCHAR(60) NOT NULL,
+  price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+  image_url TEXT,
+  is_available BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS station_food_menu (
+  menu_id SERIAL PRIMARY KEY,
+  station_code VARCHAR(10) NOT NULL REFERENCES stations(station_code),
+  food_id INTEGER NOT NULL REFERENCES food_items(food_id),
+  available_qty INTEGER NOT NULL DEFAULT 100 CHECK (available_qty >= 0),
+  UNIQUE (station_code, food_id)
+);
+
+CREATE TABLE IF NOT EXISTS food_orders (
+  food_order_id SERIAL PRIMARY KEY,
+  booking_id INTEGER NOT NULL REFERENCES bookings(booking_id) ON DELETE CASCADE,
+  delivery_station VARCHAR(10) NOT NULL REFERENCES stations(station_code),
+  total_amount NUMERIC(10, 2) NOT NULL CHECK (total_amount >= 0),
+  status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+  ordered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS food_order_items (
+  order_item_id SERIAL PRIMARY KEY,
+  food_order_id INTEGER NOT NULL REFERENCES food_orders(food_order_id) ON DELETE CASCADE,
+  food_id INTEGER NOT NULL REFERENCES food_items(food_id),
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  price NUMERIC(10, 2) NOT NULL CHECK (price >= 0)
+);
+
 CREATE INDEX IF NOT EXISTS idx_train_routes_train_stop
   ON train_routes (train_id, stop_order);
 
@@ -91,3 +125,9 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user
 
 CREATE INDEX IF NOT EXISTS idx_booked_seats_lookup
   ON booked_seats (train_id, travel_date, seat_id);
+
+CREATE INDEX IF NOT EXISTS idx_station_food_menu_station
+  ON station_food_menu (station_code);
+
+CREATE INDEX IF NOT EXISTS idx_food_orders_booking
+  ON food_orders (booking_id);
