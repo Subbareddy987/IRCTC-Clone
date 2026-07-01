@@ -1,18 +1,42 @@
+import { useNavigate } from "react-router-dom";
 import "./ChatBot.css";
-import { useEffect, useRef } from "react";
 
-const ChatMessages = ({ messages, isTyping, onAction }) => {
-  const messagesEndRef = useRef(null);
+const ChatMessages = ({ messages }) => {
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: "end" });
-  }, [messages, isTyping]);
+  const handleAction = (action) => {
+    switch (action) {
+      case "Search Trains":
+        navigate("/trains/search");
+        break;
+      case "My Bookings":
+        navigate("/mybookings");
+        break;
+      case "PNR Status":
+        navigate("/pnr-search");
+        break;
+      case "Order Food":
+        navigate("/food-selection");
+        break;
+      case "Payment":
+        navigate("/payment");
+        break;
+      case "Home":
+        navigate("/home");
+        break;
+      case "About Developer":
+        navigate("/about-developer");
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
-    <div className="chat-messages" aria-live="polite">
+    <div className="chat-messages">
       {messages.map((msg, index) => (
         <div
-          key={`${msg.sender}-${index}`}
+          key={index}
           className={msg.sender === "user" ? "user-message" : "bot-message"}
         >
           <p>{msg.text}</p>
@@ -20,22 +44,13 @@ const ChatMessages = ({ messages, isTyping, onAction }) => {
           {msg.action && (
             <button
               className="chat-action-btn"
-              onClick={() => onAction(msg.action, msg.payload)}
+              onClick={() => handleAction(msg.action)}
             >
               {msg.action}
             </button>
           )}
         </div>
       ))}
-
-      {isTyping && (
-        <div className="bot-message typing-message">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      )}
-      <div ref={messagesEndRef} />
     </div>
   );
 };

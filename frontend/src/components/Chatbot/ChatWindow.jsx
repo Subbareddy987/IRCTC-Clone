@@ -1,4 +1,3 @@
-import { quickActions } from "../../data/ChatResponse.js";
 import "./ChatBot.css";
 
 import ChatInput from "./ChatInput";
@@ -9,9 +8,7 @@ const ChatWindow = ({
   message,
   setMessage,
   messages,
-  isTyping,
-  onSendMessage,
-  onAction,
+  setMessages,
 }) => {
   return (
     <section className="chat-window" aria-label="RailMate AI chat">
@@ -26,20 +23,12 @@ const ChatWindow = ({
         </button>
       </div>
 
-      <div className="quick-actions" aria-label="Quick chat actions">
-        {quickActions.map((action) => (
-          <button key={action} type="button" onClick={() => onAction(action)}>
-            {action}
-          </button>
-        ))}
-      </div>
-
-      <ChatMessages messages={messages} isTyping={isTyping} onAction={onAction} />
+      <ChatMessages messages={messages} />
       <ChatInput
         message={message}
         setMessage={setMessage}
-        isTyping={isTyping}
-        onSendMessage={onSendMessage}
+        messages={messages}
+        setMessages={setMessages}
       />
     </section>
   );
