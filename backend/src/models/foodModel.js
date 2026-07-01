@@ -33,9 +33,6 @@ export const getFoodStationsByBooking = async (booking_id) => {
     JOIN stations s
       ON tr.station_id = s.station_id
 
-    JOIN station_food_menu sfm
-      ON sfm.station_code = s.station_code
-
     WHERE tr.stop_order > br.source_order
       AND tr.stop_order <= br.destination_order
 
@@ -79,12 +76,6 @@ export const getFoodStationsForJourney = async (
      AND tr.stop_order <= sr.destination_order
     JOIN stations s
       ON tr.station_id = s.station_id
-    JOIN station_food_menu sfm
-      ON sfm.station_code = s.station_code
-    JOIN food_items fi
-      ON fi.food_id = sfm.food_id
-    WHERE fi.is_available = true
-      AND COALESCE(sfm.available_qty, 0) > 0
     ORDER BY tr.stop_order;
   `;
 
@@ -98,7 +89,7 @@ export const getFoodStationsForJourney = async (
 };
 
 export const getStationFoodMenu = async (station_code) => {
-  const query = `
+  const stationMenuQuery = `
     SELECT
       sfm.menu_id,
       sfm.station_code,
@@ -118,7 +109,29 @@ export const getStationFoodMenu = async (station_code) => {
     ORDER BY fi.category, fi.food_name;
   `;
 
-  const result = await pool.query(query, [station_code]);
+  const stationMenuResult = await pool.query(stationMenuQuery, [station_code]);
 
-  return result.rows;
+  if (stationMenuResult.rows.length > 0) {
+    return stationMenuResult.rows;
+  }
+
+  const globalMenuQuery = `
+    SELECT
+      NULL::integer AS menu_id,
+      $1::varchar AS station_code,
+      100 AS available_qty,
+      fi.food_id,
+      fi.food_name,
+      fi.category,
+      fi.price,
+      fi.image_url,
+      fi.is_available
+    FROM food_items fi
+    WHERE fi.is_available = true
+    ORDER BY fi.category, fi.food_name;
+  `;
+
+  const globalMenuResult = await pool.query(globalMenuQuery, [station_code]);
+
+  return globalMenuResult.rows;
 };

@@ -146,28 +146,49 @@ const createFoodOrders = async (
         throw new Error("Food item and quantity are required");
       }
 
+      const foodResult = await client.query(
+        `
+          SELECT food_id, price
+          FROM food_items
+          WHERE food_id = $1
+            AND is_available = true;
+        `,
+        [foodId],
+      );
+
+      if (foodResult.rows.length === 0) {
+        throw new Error(`Food item ${foodId} is unavailable`);
+      }
+
       const menuResult = await client.query(
         `
           UPDATE station_food_menu sfm
           SET available_qty = sfm.available_qty - $3
-          FROM food_items fi
-          WHERE sfm.food_id = fi.food_id
-            AND sfm.station_code = $1
+          WHERE sfm.station_code = $1
             AND sfm.food_id = $2
-            AND fi.is_available = true
             AND sfm.available_qty >= $3
-          RETURNING fi.food_id, fi.price;
+          RETURNING sfm.food_id;
         `,
         [deliveryStation, foodId, quantity],
       );
 
-      if (menuResult.rows.length === 0) {
+      const hasStationMenu = await client.query(
+        `
+          SELECT 1
+          FROM station_food_menu
+          WHERE station_code = $1
+            AND food_id = $2;
+        `,
+        [deliveryStation, foodId],
+      );
+
+      if (hasStationMenu.rows.length > 0 && menuResult.rows.length === 0) {
         throw new Error(
-          `Food item ${foodId} is unavailable at ${deliveryStation}`,
+          `Food item ${foodId} does not have enough quantity at ${deliveryStation}`,
         );
       }
 
-      const price = Number(menuResult.rows[0].price);
+      const price = Number(foodResult.rows[0].price);
       totalAmount += price * quantity;
       preparedItems.push({ food_id: foodId, quantity, price });
     }

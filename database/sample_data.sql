@@ -187,22 +187,68 @@ INSERT INTO food_items (food_name, category, price, image_url, is_available)
 SELECT food_name, category, price, image_url, true
 FROM (
   VALUES
-    ('Veg Biryani', 'Meals', 120.00, NULL),
-    ('Chicken Biryani', 'Meals', 180.00, NULL),
-    ('South Indian Thali', 'Meals', 140.00, NULL),
-    ('Idli Sambar', 'Breakfast', 60.00, NULL),
-    ('Masala Dosa', 'Breakfast', 90.00, NULL),
-    ('Veg Sandwich', 'Snacks', 70.00, NULL),
-    ('Samosa', 'Snacks', 30.00, NULL),
-    ('Tea', 'Beverages', 15.00, NULL),
-    ('Coffee', 'Beverages', 25.00, NULL),
-    ('Water Bottle', 'Beverages', 20.00, NULL)
+    ('Veg Meals', 'Meals', 120.00, '/food/veg-meals.png'),
+    ('Chicken Biryani', 'Biryani', 220.00, '/food/chicken-biryani.png'),
+    ('Veg Biryani', 'Biryani', 180.00, '/food/veg-biryani.png'),
+    ('Fried Rice', 'Rice', 150.00, '/food/fried-rice.png'),
+    ('Paneer Curry', 'Curry', 170.00, '/food/paneer-curry.png'),
+    ('Idli', 'Breakfast', 60.00, '/food/idli.png'),
+    ('Dosa', 'Breakfast', 90.00, '/food/dosa.png'),
+    ('Poori', 'Breakfast', 80.00, '/food/poori.png'),
+    ('Samosa', 'Snacks', 25.00, '/food/samosa.png'),
+    ('Vada', 'Snacks', 30.00, '/food/vada.png'),
+    ('Tea', 'Beverages', 20.00, '/food/tea.png'),
+    ('Coffee', 'Beverages', 30.00, '/food/coffee.png'),
+    ('Water Bottle', 'Drinks', 20.00, '/food/water.png'),
+    ('Cool Drink', 'Drinks', 40.00, '/food/cooldrink.png'),
+    ('Fruit Juice', 'Drinks', 50.00, '/food/juice.png'),
+    ('Chocolate Cake', 'Dessert', 90.00, '/food/cake.png'),
+    ('Ice Cream', 'Dessert', 70.00, '/food/icecream.png'),
+    ('Veg Sandwich', 'Snacks', 80.00, '/food/sandwich.png'),
+    ('Burger', 'Fast Food', 120.00, '/food/burger.png'),
+    ('French Fries', 'Fast Food', 100.00, '/food/fries.png'),
+    ('South Indian Thali', 'Meals', 140.00, '/food/south-indian-thali.png'),
+    ('Idli Sambar', 'Breakfast', 60.00, '/food/idli-sambar.png'),
+    ('Masala Dosa', 'Breakfast', 90.00, '/food/masala-dosa.png')
 ) AS food(food_name, category, price, image_url)
 WHERE NOT EXISTS (
   SELECT 1
   FROM food_items existing
   WHERE existing.food_name = food.food_name
 );
+
+UPDATE food_items existing
+SET category = food.category,
+    price = food.price,
+    image_url = food.image_url,
+    is_available = true
+FROM (
+  VALUES
+    ('Veg Meals', 'Meals', 120.00, '/food/veg-meals.png'),
+    ('Chicken Biryani', 'Biryani', 220.00, '/food/chicken-biryani.png'),
+    ('Veg Biryani', 'Biryani', 180.00, '/food/veg-biryani.png'),
+    ('Fried Rice', 'Rice', 150.00, '/food/fried-rice.png'),
+    ('Paneer Curry', 'Curry', 170.00, '/food/paneer-curry.png'),
+    ('Idli', 'Breakfast', 60.00, '/food/idli.png'),
+    ('Dosa', 'Breakfast', 90.00, '/food/dosa.png'),
+    ('Poori', 'Breakfast', 80.00, '/food/poori.png'),
+    ('Samosa', 'Snacks', 25.00, '/food/samosa.png'),
+    ('Vada', 'Snacks', 30.00, '/food/vada.png'),
+    ('Tea', 'Beverages', 20.00, '/food/tea.png'),
+    ('Coffee', 'Beverages', 30.00, '/food/coffee.png'),
+    ('Water Bottle', 'Drinks', 20.00, '/food/water.png'),
+    ('Cool Drink', 'Drinks', 40.00, '/food/cooldrink.png'),
+    ('Fruit Juice', 'Drinks', 50.00, '/food/juice.png'),
+    ('Chocolate Cake', 'Dessert', 90.00, '/food/cake.png'),
+    ('Ice Cream', 'Dessert', 70.00, '/food/icecream.png'),
+    ('Veg Sandwich', 'Snacks', 80.00, '/food/sandwich.png'),
+    ('Burger', 'Fast Food', 120.00, '/food/burger.png'),
+    ('French Fries', 'Fast Food', 100.00, '/food/fries.png'),
+    ('South Indian Thali', 'Meals', 140.00, '/food/south-indian-thali.png'),
+    ('Idli Sambar', 'Breakfast', 60.00, '/food/idli-sambar.png'),
+    ('Masala Dosa', 'Breakfast', 90.00, '/food/masala-dosa.png')
+) AS food(food_name, category, price, image_url)
+WHERE existing.food_name = food.food_name;
 
 INSERT INTO station_food_menu (station_code, food_id, available_qty)
 SELECT station.station_code, item.food_id, menu.available_qty
@@ -247,3 +293,4 @@ JOIN food_items item
   ON item.food_name = menu.food_name
 ON CONFLICT (station_code, food_id) DO UPDATE
 SET available_qty = EXCLUDED.available_qty;
+
