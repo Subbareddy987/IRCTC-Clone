@@ -73,10 +73,7 @@ function B1Coach({ coachName = "B1", seats = [], passengers = [], assignSeat }) 
 
       
 
-      <div className="coach-warning">
-        WARNING! Coach position may not be accurate for certain trains.
-        Please check it once at station
-      </div>
+     
 
       <div className="railway-coach">
         {bays.map((bay, index) => (
