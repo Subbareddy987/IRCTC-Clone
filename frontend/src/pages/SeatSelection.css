@@ -304,6 +304,7 @@
   transition: border-color 0.18s, box-shadow 0.18s;
   background: #fafbfd;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .ss-pax-card:hover {

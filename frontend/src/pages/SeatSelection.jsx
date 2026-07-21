@@ -278,7 +278,10 @@ function SeatSelection() {
               >
                 <div className="ss-pax-bar">
                   <div className="ss-pax-bar-left">
-                    <span className="ss-pax-num">Passenger {index + 1}</span>
+                    <span className="ss-pax-num">
+                      Passenger {index + 1}
+                      {p.passenger_name ? ` - ${p.passenger_name}` : ""}
+                    </span>
                     {p.seat_number ? (
                       <span className="ss-seat-tag ss-seat-tag--filled">
                         {p.coach_name}-{p.seat_number}
@@ -317,66 +320,68 @@ function SeatSelection() {
                   </div>
                 </div>
 
-                <div className="ss-pax-form">
-                  <div className="ss-form-row">
-                    <div className="ss-form-group ss-form-grow">
-                      <label className="ss-label">Name <span className="ss-required">*</span></label>
-                      <input
-                        type="text"
-                        placeholder="Full name"
-                        value={p.passenger_name}
-                        className={`ss-input ${!p.passenger_name.trim() && activePassenger === index ? "ss-input--error" : ""}`}
-                        onChange={(e) => {
-                          const updated = [...passengers];
-                          updated[index].passenger_name = e.target.value;
-                          setPassengers(updated);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      />
+                {activePassenger === index && (
+                  <div className="ss-pax-form">
+                    <div className="ss-form-row">
+                      <div className="ss-form-group ss-form-grow">
+                        <label className="ss-label">Name <span className="ss-required">*</span></label>
+                        <input
+                          type="text"
+                          placeholder="Full name"
+                          value={p.passenger_name}
+                          className={`ss-input ${!p.passenger_name.trim() && activePassenger === index ? "ss-input--error" : ""}`}
+                          onChange={(e) => {
+                            const updated = [...passengers];
+                            updated[index].passenger_name = e.target.value;
+                            setPassengers(updated);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="ss-form-group ss-form-age">
+                        <label className="ss-label">Age <span className="ss-required">*</span></label>
+                        <input
+                          type="number"
+                          placeholder="-"
+                          min="1"
+                          max="120"
+                          value={p.age}
+                          className={`ss-input ${(!p.age || p.age < 1 || p.age > 120) && activePassenger === index ? "ss-input--error" : ""}`}
+                          onChange={(e) => {
+                            const updated = [...passengers];
+                            updated[index].age = e.target.value;
+                            setPassengers(updated);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
                     </div>
-                    <div className="ss-form-group ss-form-age">
-                      <label className="ss-label">Age <span className="ss-required">*</span></label>
-                      <input
-                        type="number"
-                        placeholder="-"
-                        min="1"
-                        max="120"
-                        value={p.age}
-                        className={`ss-input ${(!p.age || p.age < 1 || p.age > 120) && activePassenger === index ? "ss-input--error" : ""}`}
-                        onChange={(e) => {
-                          const updated = [...passengers];
-                          updated[index].age = e.target.value;
-                          setPassengers(updated);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      />
+                    <div className="ss-form-row">
+                      <div className="ss-form-group">
+                        <label className="ss-label">Gender <span className="ss-required">*</span></label>
+                        <select
+                          className="ss-select"
+                          value={p.gender}
+                          onChange={(e) => {
+                            const updated = [...passengers];
+                            updated[index].gender = e.target.value;
+                            setPassengers(updated);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Transgender">Transgender</option>
+                        </select>
+                      </div>
                     </div>
+                    {!p.seat_id && activePassenger === index && (
+                      <div className="ss-seat-hint">
+                        Select a seat from the coach layout.
+                      </div>
+                    )}
                   </div>
-                  <div className="ss-form-row">
-                    <div className="ss-form-group">
-                      <label className="ss-label">Gender <span className="ss-required">*</span></label>
-                      <select
-                        className="ss-select"
-                        value={p.gender}
-                        onChange={(e) => {
-                          const updated = [...passengers];
-                          updated[index].gender = e.target.value;
-                          setPassengers(updated);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Transgender">Transgender</option>
-                      </select>
-                    </div>
-                  </div>
-                  {!p.seat_id && activePassenger === index && (
-                    <div className="ss-seat-hint">
-                      Select a seat from the coach layout.
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             ))}
           </div>
