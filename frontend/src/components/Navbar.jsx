@@ -25,8 +25,8 @@ function Navbar() {
     { to: "/about-developer", label: "Developer" },
   ];
 
-  const initials = user?.name
-    ? user.name
+  const initials = user?.full_name
+    ? user.full_name
         .split(" ")
         .map((w) => w[0])
         .slice(0, 2)
@@ -75,7 +75,7 @@ function Navbar() {
             <>
               <div className="nb__user">
                 <div className="nb__avatar">{initials}</div>
-                <span className="nb__username">{user.name}</span>
+                <span className="nb__username">{user.full_name}</span>
               </div>
               <button className="nb__logout" onClick={handleLogout}>
                 Logout
@@ -114,7 +114,7 @@ function Navbar() {
           </Link>
         ))}
         <div className="nb__drawer-foot">
-          {user && <span className="nb__drawer-user">👤 {user.name}</span>}
+          {user && <span className="nb__drawer-user">👤 {user.full_name}</span>}
           <button
             className="nb__logout nb__logout--mobile"
             onClick={handleLogout}

@@ -1,6 +1,6 @@
 import { useState } from "react";
  import { registeruser } from "../services/autoService";
- import { useNavigate} from "react-router-dom";
+ import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
 import { toast } from "react-toastify";
 function Register() {
@@ -42,7 +42,7 @@ function Register() {
             
             localStorage.setItem("token", response.token);
             localStorage.setItem("user", JSON.stringify(response.user));
-            toast.success(`${full_name} Registered Successfull Successful`);
+            toast.success(`${full_name} Registered Successfully`);
             navigate("/home");
             console.log(response);
     }catch(error){
@@ -190,12 +190,11 @@ function Register() {
                   id="rp-mobile"
                   className="rp-input"
                   type="tel"
-                  placeholder="Enter Your Mobile Number"
+                  placeholder="Enter Your Mobile Number (Optional)"
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   onFocus={() => setFocused("mobile")}
                   onBlur={() => setFocused("")}
-                  required
                 />
               </div>
             </div>
@@ -296,7 +295,13 @@ function Register() {
             </button>
           </form>
 
-          
+          <p className="rp-login-link">
+            Already have an account?{" "}
+            <Link to="/" className="rp-login-anchor">
+              Login here
+            </Link>
+          </p>
+
           <div className="rp-divider-wrap">
             <span className="rp-divider-line" />
             <span className="rp-divider-text">Trusted by 10 Crore+ passengers</span>
