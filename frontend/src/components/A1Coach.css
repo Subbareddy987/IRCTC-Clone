@@ -9,6 +9,8 @@
   --accent-booked: #6b7280;
   --accent-selected: #38bdf8;
   --accent-selected-deep: #0284c7;
+  --accent-reserving: #f59e0b;
+  --accent-reserving-deep: #b45309;
   --text-light: #e6ecf5;
   --text-muted: #8b96ab;
   --warning-bg: #ef4444;
@@ -59,6 +61,7 @@
 .a1-dot.available { background: var(--accent-available); }
 .a1-dot.booked { background: var(--accent-booked); }
 .a1-dot.selected { background: var(--accent-selected); }
+.a1-dot.reserving { background: var(--accent-reserving); }
 
 .a1-warning {
   background: var(--warning-bg);
@@ -167,6 +170,19 @@
 
 .a1-seat.selected .a1-seat-berth {
   color: #082f49;
+}
+
+.a1-seat.reserving {
+  background: var(--accent-reserving);
+  border-left-color: var(--accent-reserving-deep);
+  color: #111827;
+  cursor: wait;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35);
+}
+
+.a1-seat.reserving .a1-seat-berth {
+  color: #422006;
+  font-weight: 800;
 }
 
 /* Mobile */

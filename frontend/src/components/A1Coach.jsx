@@ -1,6 +1,6 @@
 import "./A1Coach.css";
 
-function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
+function A1Coach({ coachName = "A1", seats, passengers, assignSeat, reservingSeatId = null }) {
   const isSelected = (seatId) =>
     passengers.some((p) => p.seat_id === seatId);
 
@@ -8,7 +8,9 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
     if (!seat) return null;
 
     const selected = isSelected(seat.seat_id);
+    const reserving = reservingSeatId === seat.seat_id;
     const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
+    const isDisabled = (isUnavailable && !selected) || Boolean(reservingSeatId);
 
     return (
       <button
@@ -16,8 +18,9 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
         className={`a1-seat
           ${isUnavailable && !selected ? "booked" : ""}
           ${selected ? "selected" : ""}
+          ${reserving ? "reserving" : ""}
         `}
-        disabled={isUnavailable && !selected}
+        disabled={isDisabled}
         onClick={() => (!isUnavailable || selected) && assignSeat(seat)}
       >
         <div className="a1-seat-number">
@@ -25,7 +28,7 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
         </div>
 
         <div className="a1-seat-berth">
-          {seat.berth_type}
+          {reserving ? "WAIT" : seat.berth_type}
         </div>
       </button>
     );
@@ -52,6 +55,11 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
           <div>
             <span className="a1-dot selected"></span>
             Selected
+          </div>
+
+          <div>
+            <span className="a1-dot reserving"></span>
+            Reserving
           </div>
 
           <div>

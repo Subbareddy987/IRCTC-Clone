@@ -9,6 +9,8 @@
   --accent-booked: #6b7280;
   --accent-selected: #3b82f6;
   --accent-selected-deep: #1d4ed8;
+  --accent-reserving: #f59e0b;
+  --accent-reserving-deep: #b45309;
   --text-light: #e6ecf5;
   --text-muted: #8b96ab;
   --warning-bg: #ef4444;
@@ -59,6 +61,7 @@
 .dot.available { background: var(--accent-available); }
 .dot.booked { background: var(--accent-booked); }
 .dot.selected { background: var(--accent-selected); }
+.dot.reserving { background: var(--accent-reserving); }
 
 .coach-warning {
   background: var(--warning-bg);
@@ -175,6 +178,19 @@
 
 .rail-seat.selected .seat-berth {
   color: #dbeafe;
+}
+
+.rail-seat.reserving {
+  background: var(--accent-reserving);
+  border-left-color: var(--accent-reserving-deep);
+  color: #111827;
+  cursor: wait;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35);
+}
+
+.rail-seat.reserving .seat-berth {
+  color: #422006;
+  font-weight: 800;
 }
 
 /* Mobile */

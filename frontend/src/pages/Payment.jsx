@@ -32,8 +32,16 @@ function Payment() {
   const baseFare = fareMap[bookingData.coach_type] || 100;
   const farePerPassenger = baseFare + stationGap * 87;
   const ticketFare = farePerPassenger * passengerCount;
-  const foodSummary = bookingData.food_summary || [];
-  const foodTotal = Number(bookingData.food_total || 0);
+  const foodSummary = (bookingData.food_summary || []).filter(
+    (item) => item.delivery_station !== bookingData.source_station_code,
+  );
+  const foodOrders = (bookingData.food_orders || []).filter(
+    (order) => order.delivery_station !== bookingData.source_station_code,
+  );
+  const foodTotal = foodSummary.reduce(
+    (sum, item) => sum + Number(item.price) * Number(item.quantity),
+    0,
+  );
   const totalFare = ticketFare + foodTotal;
   const upiLink = `upi://pay?pa=kambamsubbareddy987@axl&pn=IRCTC Reservation&am=${totalFare}&cu=INR`;
 
@@ -49,7 +57,12 @@ function Payment() {
   const handlePayment = async () => {
     try {
       setLoading(true);
-      const response = await createBooking(bookingData);
+      const response = await createBooking({
+        ...bookingData,
+        food_orders: foodOrders,
+        food_summary: foodSummary,
+        food_total: foodTotal,
+      });
       toast.success(response.message);
       toast.success("Payment successful!");
       navigate("/mybookings");

@@ -111,9 +111,7 @@ function formatTrainTime(time) {
 function Searchtrain() {
   const [source, setSource] = useState({ code: "", name: "" });
   const [destination, setDestination] = useState({ code: "", name: "" });
-  const [journeyDate, setJourneyDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [journeyDate, setJourneyDate] = useState("");
   const [coachType] = useState("Sleeper");
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -155,12 +153,6 @@ function Searchtrain() {
     }
   };
 
-  useEffect(() => {
-    if (source.code && destination.code) {
-      executeSearch(source.code, destination.code);
-    }
-  }, [source.code, destination.code]);
-
   const swapStations = () => {
     const temp = source;
     setSource(destination);
@@ -171,6 +163,10 @@ function Searchtrain() {
     if (e) e.preventDefault();
     if (!source.code || !destination.code) {
       toast.error("Please select valid stations from the suggestions.");
+      return;
+    }
+    if (!journeyDate) {
+      toast.error("Please select a journey date.");
       return;
     }
     executeSearch(source.code, destination.code);

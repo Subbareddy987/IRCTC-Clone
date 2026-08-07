@@ -5,12 +5,20 @@ import { io } from "socket.io-client";
 import A1Coach from "../components/A1Coach.jsx";
 import B1Coach from "../components/B1Coach.jsx";
 import SleeperCoach from "../components/Sleepercoach.jsx";
-import { getSeats, lockSeatApi, unlockSeatApi } from "../services/autoService";
+import { getSeats, lockSeatApi, unlockSeatApi, unlockSeatOnUnload } from "../services/autoService";
 import "./SeatSelection.css";
 
 const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "")
   : "https://irctc-backend-r0p7.onrender.com";
+
+const getCurrentUserId = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null")?.user_id;
+  } catch {
+    return null;
+  }
+};
 
 function SeatSelection() {
   const { train_id } = useParams();
@@ -18,6 +26,8 @@ function SeatSelection() {
   const navigate = useNavigate();
   const location = useLocation();
   const socketRef = useRef(null);
+  const passengersRef = useRef([]);
+  const keepSeatLocksRef = useRef(false);
 
   const travel_date = searchParams.get("date");
   const coach_name = searchParams.get("coachName");
@@ -32,7 +42,7 @@ function SeatSelection() {
 
   const [seats, setSeats] = useState([]);
   const [loadingSeats, setLoadingSeats] = useState(true);
-  const [lockingSeatId, setLockingSeatId] = useState(null);
+  const [reservingSeatId, setReservingSeatId] = useState(null);
   const [passengers, setPassengers] = useState([
     {
       passenger_name: "",
@@ -48,6 +58,37 @@ function SeatSelection() {
   const [activePassenger, setActivePassenger] = useState(0);
 
   useEffect(() => {
+    passengersRef.current = passengers;
+  }, [passengers]);
+
+  useEffect(() => {
+    const selectedSeatIds = () => [
+      ...new Set(passengersRef.current.map((p) => p.seat_id).filter(Boolean)),
+    ];
+
+    const unlockSelectedSeats = () => {
+      if (keepSeatLocksRef.current) return;
+      selectedSeatIds().forEach((seatId) => {
+        unlockSeatApi(train_id, travel_date, seatId).catch(() => {});
+      });
+    };
+
+    const unlockSelectedSeatsOnUnload = () => {
+      if (keepSeatLocksRef.current) return;
+      selectedSeatIds().forEach((seatId) => {
+        unlockSeatOnUnload(train_id, travel_date, seatId);
+      });
+    };
+
+    window.addEventListener("beforeunload", unlockSelectedSeatsOnUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", unlockSelectedSeatsOnUnload);
+      unlockSelectedSeats();
+    };
+  }, [train_id, travel_date]);
+
+  useEffect(() => {
     async function loadSeats() {
       setLoadingSeats(true);
       try {
@@ -55,7 +96,32 @@ function SeatSelection() {
           throw new Error("Incomplete journey or coach selection");
         }
         const response = await getSeats(train_id, travel_date, coach_name);
-        setSeats(response.seats);
+        const currentUserId = getCurrentUserId();
+        const loadedSeats = response.seats || [];
+        const ownLockedSeatIds = loadedSeats
+          .filter(
+            (seat) =>
+              seat.status === "LOCKED" &&
+              currentUserId &&
+              Number(seat.locked_by_user) === Number(currentUserId),
+          )
+          .map((seat) => seat.seat_id);
+
+        if (ownLockedSeatIds.length > 0) {
+          await Promise.all(
+            ownLockedSeatIds.map((seatId) =>
+              unlockSeatApi(train_id, travel_date, seatId).catch(() => null),
+            ),
+          );
+        }
+
+        setSeats(
+          loadedSeats.map((seat) =>
+            ownLockedSeatIds.includes(seat.seat_id)
+              ? { ...seat, status: "AVAILABLE", locked_by_user: null }
+              : seat,
+          ),
+        );
       } catch (error) {
         console.error(error);
         toast.error("Failed to load seat data");
@@ -138,43 +204,65 @@ function SeatSelection() {
   };
 
   const assignSeat = async (seat) => {
+    if (reservingSeatId) {
+      toast.info("Please wait while we reserve your selected seat.");
+      return;
+    }
+
     const isTakenByOther =
       seat.status === "BOOKED" ||
       (seat.status === "LOCKED" && !passengers.some((p) => p.seat_id === seat.seat_id));
+    const assignedPassengerIndex = passengers.findIndex((p) => p.seat_id === seat.seat_id);
 
     if (isTakenByOther) {
       toast.warning("This seat is already assigned to another passenger");
       return;
     }
-    if (passengers.some((p) => p.seat_id === seat.seat_id)) {
+    if (assignedPassengerIndex === activePassenger) {
+      return;
+    }
+    if (assignedPassengerIndex !== -1) {
       toast.warning("Seat already assigned to another passenger");
       return;
     }
 
-    setLockingSeatId(seat.seat_id);
+    const passengerIndex = activePassenger;
+    const oldSeatId = passengers[passengerIndex]?.seat_id;
+
+    setReservingSeatId(seat.seat_id);
 
     try {
       await lockSeatApi(train_id, travel_date, seat.seat_id);
     } catch (error) {
       console.warn("Lock API response:", error);
+      setReservingSeatId(null);
+
       if (error.response?.data?.message?.includes("another passenger")) {
         toast.warning("This seat was just selected by another passenger");
         setSeats((prevSeats) =>
           prevSeats.map((s) => (s.seat_id === seat.seat_id ? { ...s, status: "BOOKED" } : s)),
         );
-        setLockingSeatId(null);
-        return;
+      } else {
+        toast.error("Could not reserve this seat. Please try another one.");
       }
+      return;
     }
 
-    const oldSeatId = passengers[activePassenger]?.seat_id;
+    setSeats((prevSeats) =>
+      prevSeats.map((s) => {
+        if (s.seat_id === seat.seat_id) return { ...s, status: "LOCKED" };
+        if (oldSeatId && s.seat_id === oldSeatId) return { ...s, status: "AVAILABLE" };
+        return s;
+      }),
+    );
+
     if (oldSeatId) {
       unlockSeatApi(train_id, travel_date, oldSeatId).catch(() => {});
     }
 
     const updated = [...passengers];
-    updated[activePassenger] = {
-      ...updated[activePassenger],
+    updated[passengerIndex] = {
+      ...updated[passengerIndex],
       seat_id: seat.seat_id,
       seat_number: seat.seat_number,
       coach_name: seat.coach_name,
@@ -182,8 +270,8 @@ function SeatSelection() {
     };
     setPassengers(updated);
 
-    toast.success(`Seat ${seat.coach_name}-${seat.seat_number} assigned to Passenger ${activePassenger + 1}`);
-    setLockingSeatId(null);
+    toast.success(`Seat ${seat.coach_name}-${seat.seat_number} assigned to Passenger ${passengerIndex + 1}`);
+    setReservingSeatId(null);
   };
 
   const clearSeatAssignment = async (index) => {
@@ -217,6 +305,8 @@ function SeatSelection() {
       toast.error("Please complete all passenger details and select seats");
       return;
     }
+
+    keepSeatLocksRef.current = true;
 
     navigate("/food-selection", {
       state: {
@@ -317,6 +407,7 @@ function SeatSelection() {
             <h2 className="ss-panel-title">Coach Layout</h2>
             <div className="ss-legend">
               <span className="ss-legend-dot ss-dot-available" />Available
+              <span className="ss-legend-dot ss-dot-reserving" />Reserving
               <span className="ss-legend-dot ss-dot-selected" />Selected
               <span className="ss-legend-dot ss-dot-booked" />Booked
             </div>
@@ -330,9 +421,9 @@ function SeatSelection() {
               </div>
             ) : (
               <>
-                {normalizedCoachType === "2A" && <A1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
-                {normalizedCoachType === "3A" && <B1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
-                {normalizedCoachType === "Sleeper" && <SleeperCoach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} />}
+                {normalizedCoachType === "2A" && <A1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} reservingSeatId={reservingSeatId} />}
+                {normalizedCoachType === "3A" && <B1Coach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} reservingSeatId={reservingSeatId} />}
+                {normalizedCoachType === "Sleeper" && <SleeperCoach coachName={coach_name} seats={seats} passengers={passengers} assignSeat={assignSeat} reservingSeatId={reservingSeatId} />}
                 {!["2A", "3A", "Sleeper"].includes(normalizedCoachType) && (
                   <div className="ss-coach-loading">
                     <p>No seat layout is available for {coach_type || "this coach type"}.</p>

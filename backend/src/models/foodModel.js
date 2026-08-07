@@ -1,5 +1,82 @@
 import pool from "../config/db.js";
 
+const DEFAULT_FOOD_CATALOG = [
+  { food_name: "Chicken Biryani", category: "Biryani", price: 220, image_url: "/food/chicken-biryani.png", available_qty: 90 },
+  { food_name: "Veg Biryani", category: "Biryani", price: 180, image_url: "/food/veg-biryani.png", available_qty: 120 },
+  { food_name: "South Indian Thali", category: "Meals", price: 140, image_url: "/food/south-indian-thali.png", available_qty: 100 },
+  { food_name: "Veg Meals", category: "Meals", price: 120, image_url: "/food/veg-meals.png", available_qty: 150 },
+  { food_name: "Paneer Curry", category: "Curry", price: 170, image_url: "/food/paneer-curry.png", available_qty: 90 },
+  { food_name: "Masala Dosa", category: "Breakfast", price: 90, image_url: "/food/masala-dosa.png", available_qty: 100 },
+  { food_name: "Dosa", category: "Breakfast", price: 80, image_url: "/food/dosa.png", available_qty: 120 },
+  { food_name: "Idli Sambar", category: "Breakfast", price: 60, image_url: "/food/idli-sambar.png", available_qty: 140 },
+  { food_name: "Idli", category: "Breakfast", price: 60, image_url: "/food/idli.png", available_qty: 140 },
+  { food_name: "Vada", category: "Snacks", price: 30, image_url: "/food/vada.png", available_qty: 100 },
+  { food_name: "Poori", category: "Breakfast", price: 80, image_url: "/food/poori.png", available_qty: 95 },
+  { food_name: "Samosa", category: "Snacks", price: 25, image_url: "/food/samosa.png", available_qty: 200 },
+  { food_name: "Burger", category: "Fast Food", price: 120, image_url: "/food/burger.png", available_qty: 80 },
+  { food_name: "Veg Sandwich", category: "Snacks", price: 80, image_url: "/food/sandwich.png", available_qty: 90 },
+  { food_name: "French Fries", category: "Fast Food", price: 100, image_url: "/food/fries.png", available_qty: 110 },
+  { food_name: "Fried Rice", category: "Rice", price: 150, image_url: "/food/fried-rice.png", available_qty: 100 },
+  { food_name: "Coffee", category: "Beverages", price: 30, image_url: "/food/coffee.png", available_qty: 250 },
+  { food_name: "Tea", category: "Beverages", price: 20, image_url: "/food/tea.png", available_qty: 300 },
+  { food_name: "Cool Drink", category: "Drinks", price: 40, image_url: "/food/cooldrink.png", available_qty: 200 },
+  { food_name: "Fruit Juice", category: "Drinks", price: 50, image_url: "/food/juice.png", available_qty: 150 },
+  { food_name: "Water Bottle", category: "Drinks", price: 20, image_url: "/food/water.png", available_qty: 300 },
+  { food_name: "Ice Cream", category: "Dessert", price: 70, image_url: "/food/icecream.png", available_qty: 120 },
+  { food_name: "Chocolate Cake", category: "Dessert", price: 90, image_url: "/food/cake.png", available_qty: 90 },
+];
+
+const ensureFullStationMenu = async (station_code) => {
+  for (const item of DEFAULT_FOOD_CATALOG) {
+    const foodResult = await pool.query(
+      `
+        WITH existing AS (
+          SELECT food_id
+          FROM food_items
+          WHERE LOWER(food_name) = LOWER($1)
+          ORDER BY food_id
+          LIMIT 1
+        ),
+        inserted AS (
+          INSERT INTO food_items (food_name, category, price, image_url, is_available)
+          SELECT $1, $2, $3, $4, true
+          WHERE NOT EXISTS (SELECT 1 FROM existing)
+          RETURNING food_id
+        )
+        SELECT food_id FROM inserted
+        UNION ALL
+        SELECT food_id FROM existing
+        LIMIT 1;
+      `,
+      [item.food_name, item.category, item.price, item.image_url],
+    );
+
+    const foodId = foodResult.rows[0]?.food_id;
+    if (!foodId) continue;
+
+    await pool.query(
+      `
+        UPDATE food_items
+        SET category = $2,
+            price = $3,
+            image_url = $4,
+            is_available = true
+        WHERE food_id = $1;
+      `,
+      [foodId, item.category, item.price, item.image_url],
+    );
+
+    await pool.query(
+      `
+        INSERT INTO station_food_menu (station_code, food_id, available_qty)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (station_code, food_id) DO NOTHING;
+      `,
+      [station_code, foodId, item.available_qty],
+    );
+  }
+};
+
 export const getFoodStationsByBooking = async (booking_id) => {
   const query = `
     WITH booking_route AS (
@@ -72,7 +149,7 @@ export const getFoodStationsForJourney = async (
     FROM selected_route sr
     JOIN train_routes tr
       ON tr.train_id = $1
-     AND tr.stop_order >= sr.source_order
+     AND tr.stop_order > sr.source_order
      AND tr.stop_order <= sr.destination_order
     JOIN stations s
       ON tr.station_id = s.station_id
@@ -109,19 +186,9 @@ export const getFoodStationsForJourney = async (
 };
 
 export const getStationFoodMenu = async (station_code) => {
-  const DEFAULT_IRCTC_MENU = [
-    { food_id: 101, food_name: "Veg Biryani", category: "Biryani", price: "180.00", image_url: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500&auto=format&fit=crop&q=60", available_qty: 120, is_available: true, station_code },
-    { food_id: 102, food_name: "Chicken Biryani", category: "Biryani", price: "240.00", image_url: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=500&auto=format&fit=crop&q=60", available_qty: 85, is_available: true, station_code },
-    { food_id: 103, food_name: "Standard Veg Thali", category: "Meals", price: "150.00", image_url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500&auto=format&fit=crop&q=60", available_qty: 150, is_available: true, station_code },
-    { food_id: 104, food_name: "Paneer Butter Masala & Naan", category: "Meals", price: "210.00", image_url: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=500&auto=format&fit=crop&q=60", available_qty: 90, is_available: true, station_code },
-    { food_id: 105, food_name: "Masala Dosa & Sambar", category: "Breakfast", price: "90.00", image_url: "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=500&auto=format&fit=crop&q=60", available_qty: 100, is_available: true, station_code },
-    { food_id: 106, food_name: "Hot Samosa & Masala Chai (2 Pcs)", category: "Snacks", price: "50.00", image_url: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&auto=format&fit=crop&q=60", available_qty: 200, is_available: true, station_code },
-    { food_id: 107, food_name: "Mineral Water Bottle (1L)", category: "Drinks", price: "20.00", image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500&auto=format&fit=crop&q=60", available_qty: 300, is_available: true, station_code },
-    { food_id: 108, food_name: "Fresh Mango Lassi", category: "Drinks", price: "60.00", image_url: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500&auto=format&fit=crop&q=60", available_qty: 110, is_available: true, station_code },
-    { food_id: 109, food_name: "Gulab Jamun (2 Pcs)", category: "Desserts", price: "60.00", image_url: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop&q=60", available_qty: 140, is_available: true, station_code }
-  ];
-
   try {
+    await ensureFullStationMenu(station_code);
+
     const stationMenuQuery = `
       SELECT DISTINCT ON (fi.food_name)
         sfm.menu_id,
@@ -143,20 +210,9 @@ export const getStationFoodMenu = async (station_code) => {
     `;
 
     const dbResult = await pool.query(stationMenuQuery, [station_code]);
-    const dbItems = dbResult.rows || [];
-
-    const existingNames = new Set(dbItems.map((item) => item.food_name.toLowerCase()));
-    const merged = [...dbItems];
-
-    for (const item of DEFAULT_IRCTC_MENU) {
-      if (!existingNames.has(item.food_name.toLowerCase())) {
-        merged.push({ ...item, station_code });
-      }
-    }
-
-    return merged;
+    return dbResult.rows || [];
   } catch (error) {
     console.error("Food menu fetch error:", error);
-    return DEFAULT_IRCTC_MENU;
+    return [];
   }
 };

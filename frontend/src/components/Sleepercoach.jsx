@@ -1,6 +1,6 @@
 import "./Sleepercoach.css";
 
-function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSeat }) {
+function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSeat, reservingSeatId = null }) {
   const selectedSeatIds = new Set(
     passengers.map((passenger) => passenger.seat_id)
   );
@@ -10,10 +10,12 @@ function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSea
   const getSeatClassName = (seat) => {
     const classes = ["rail-seat"];
     const selected = isSelected(seat.seat_id);
+    const reserving = reservingSeatId === seat.seat_id;
     const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
 
     if (isUnavailable && !selected) classes.push("booked");
     if (selected) classes.push("selected");
+    if (reserving) classes.push("reserving");
 
     return classes.join(" ");
   };
@@ -22,18 +24,20 @@ function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSea
     if (!seat) return <div className="seat-placeholder" />;
 
     const selected = isSelected(seat.seat_id);
+    const reserving = reservingSeatId === seat.seat_id;
     const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
+    const isDisabled = (isUnavailable && !selected) || Boolean(reservingSeatId);
 
     return (
       <button
         key={seat.seat_id}
         type="button"
         className={getSeatClassName(seat)}
-        disabled={isUnavailable && !selected}
+        disabled={isDisabled}
         onClick={() => (!isUnavailable || selected) && assignSeat(seat)}
       >
         <span className="seat-number">{seat.seat_number}</span>
-        <span className="seat-berth">{seat.berth_type}</span>
+        <span className="seat-berth">{reserving ? "WAIT" : seat.berth_type}</span>
       </button>
     );
   };
@@ -58,6 +62,11 @@ function SleeperCoach({ coachName = "S1", seats = [], passengers = [], assignSea
           <div>
             <span className="dot selected" />
             Selected
+          </div>
+
+          <div>
+            <span className="dot reserving" />
+            Reserving
           </div>
 
           <div>

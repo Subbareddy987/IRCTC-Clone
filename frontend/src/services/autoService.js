@@ -1,7 +1,7 @@
 import axios from "axios";
 const API_URL =
   import.meta.env.VITE_API_URL || "https://irctc-backend-r0p7.onrender.com/api";
-const FOOD_CACHE_KEY = "food_menu_cache_v2";
+const FOOD_CACHE_KEY = "food_menu_cache_v4";
 const FOOD_CACHE_TTL_MS = 10 * 60 * 1000;
 
 const readFoodCache = () => {
@@ -102,6 +102,21 @@ export const unlockSeatApi = async (train_id, travel_date, seat_id) => {
     },
   );
   return response.data;
+};
+
+export const unlockSeatOnUnload = (train_id, travel_date, seat_id) => {
+  const token = localStorage.getItem("token");
+  if (!token || !train_id || !travel_date || !seat_id) return;
+
+  fetch(`${API_URL}/bookings/unlock`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ train_id, travel_date, seat_id }),
+    keepalive: true,
+  }).catch(() => {});
 };
 export const createBooking = async (bookingData) => {
   const token = localStorage.getItem("token");
