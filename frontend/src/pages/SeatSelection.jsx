@@ -1,17 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { io } from "socket.io-client";
 import A1Coach from "../components/A1Coach.jsx";
 import B1Coach from "../components/B1Coach.jsx";
 import SleeperCoach from "../components/Sleepercoach.jsx";
-import { getSeats } from "../services/autoService";
+import { getSeats, lockSeatApi, unlockSeatApi } from "../services/autoService";
 import "./SeatSelection.css";
+
+const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "")
+  : "https://irctc-backend-r0p7.onrender.com";
 
 function SeatSelection() {
   const { train_id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const socketRef = useRef(null);
 
   const travel_date = searchParams.get("date");
   const coach_name = searchParams.get("coachName");
@@ -26,6 +32,7 @@ function SeatSelection() {
 
   const [seats, setSeats] = useState([]);
   const [loadingSeats, setLoadingSeats] = useState(true);
+  const [lockingSeatId, setLockingSeatId] = useState(null);
   const [passengers, setPassengers] = useState([
     {
       passenger_name: "",
@@ -60,9 +67,39 @@ function SeatSelection() {
     loadSeats();
   }, [train_id, travel_date, coach_name, coach_type, source_station_id, destination_station_id]);
 
-  const addPassenger = () => {
-    
+  useEffect(() => {
+    if (!train_id || !travel_date || !coach_name) return;
 
+    const socket = io(SOCKET_SERVER_URL);
+    socketRef.current = socket;
+
+    socket.emit("join-coach", { train_id, travel_date, coach_name });
+
+    socket.on("seat_locked", ({ seat_id }) => {
+      setSeats((prevSeats) =>
+        prevSeats.map((s) => (s.seat_id === seat_id ? { ...s, status: "LOCKED" } : s)),
+      );
+    });
+
+    socket.on("seat_unlocked", ({ seat_id }) => {
+      setSeats((prevSeats) =>
+        prevSeats.map((s) => (s.seat_id === seat_id ? { ...s, status: "AVAILABLE" } : s)),
+      );
+    });
+
+    socket.on("seats_booked", ({ seat_ids }) => {
+      setSeats((prevSeats) =>
+        prevSeats.map((s) => (seat_ids.includes(s.seat_id) ? { ...s, status: "BOOKED" } : s)),
+      );
+    });
+
+    return () => {
+      socket.emit("leave-coach", { train_id, travel_date, coach_name });
+      socket.disconnect();
+    };
+  }, [train_id, travel_date, coach_name]);
+
+  const addPassenger = () => {
     const newIndex = passengers.length;
     setPassengers([
       ...passengers,
@@ -80,24 +117,59 @@ function SeatSelection() {
     setActivePassenger(newIndex);
   };
 
-  const removePassenger = (index) => {
+  const removePassenger = async (index) => {
     if (passengers.length <= 1) {
       toast.warning("At least one passenger is required");
       return;
     }
+
+    const p = passengers[index];
+    if (p.seat_id) {
+      try {
+        await unlockSeatApi(train_id, travel_date, p.seat_id);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     const updated = passengers.filter((_, i) => i !== index);
     setPassengers(updated);
     setActivePassenger(Math.min(activePassenger, updated.length - 1));
   };
 
-  const assignSeat = (seat) => {
-    if (seat.status !== "AVAILABLE") {
-      toast.warning("This seat is not available");
+  const assignSeat = async (seat) => {
+    const isTakenByOther =
+      seat.status === "BOOKED" ||
+      (seat.status === "LOCKED" && !passengers.some((p) => p.seat_id === seat.seat_id));
+
+    if (isTakenByOther) {
+      toast.warning("This seat is already assigned to another passenger");
       return;
     }
     if (passengers.some((p) => p.seat_id === seat.seat_id)) {
       toast.warning("Seat already assigned to another passenger");
       return;
+    }
+
+    setLockingSeatId(seat.seat_id);
+
+    try {
+      await lockSeatApi(train_id, travel_date, seat.seat_id);
+    } catch (error) {
+      console.warn("Lock API response:", error);
+      if (error.response?.data?.message?.includes("another passenger")) {
+        toast.warning("This seat was just selected by another passenger");
+        setSeats((prevSeats) =>
+          prevSeats.map((s) => (s.seat_id === seat.seat_id ? { ...s, status: "BOOKED" } : s)),
+        );
+        setLockingSeatId(null);
+        return;
+      }
+    }
+
+    const oldSeatId = passengers[activePassenger]?.seat_id;
+    if (oldSeatId) {
+      unlockSeatApi(train_id, travel_date, oldSeatId).catch(() => {});
     }
 
     const updated = [...passengers];
@@ -109,10 +181,24 @@ function SeatSelection() {
       berth_type: seat.berth_type || null,
     };
     setPassengers(updated);
+
     toast.success(`Seat ${seat.coach_name}-${seat.seat_number} assigned to Passenger ${activePassenger + 1}`);
+    setLockingSeatId(null);
   };
 
-  const clearSeatAssignment = (index) => {
+  const clearSeatAssignment = async (index) => {
+    const p = passengers[index];
+    if (p.seat_id) {
+      try {
+        await unlockSeatApi(train_id, travel_date, p.seat_id);
+        setSeats((prevSeats) =>
+          prevSeats.map((s) => (s.seat_id === p.seat_id ? { ...s, status: "AVAILABLE" } : s)),
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     const updated = [...passengers];
     updated[index] = {
       ...updated[index],

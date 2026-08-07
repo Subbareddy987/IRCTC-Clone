@@ -5,8 +5,11 @@ import {
   getBookingDetails,
   getBookingbyPNR,
   bookingCancel,
+  lockSeat,
+  unlockSeat,
 } from "../models/bookingModel.js";
 import pool from "../config/db.js";
+
 export const addBooking = async (req, res) => {
   try {
     const user_id = req.user.user_id;
@@ -54,7 +57,9 @@ export const addBooking = async (req, res) => {
       });
     }
 
-    const pnr = "PNR" + Date.now();
+    const zonePrefix = "42";
+    const random8 = Math.floor(10000000 + Math.random() * 90000000);
+    const pnr = `${zonePrefix}${random8}`;
 
     const booking = await createBooking(
       user_id,
@@ -66,6 +71,20 @@ export const addBooking = async (req, res) => {
       passengers,
       food_orders,
     );
+
+    const io = req.app.get("io");
+    if (io && passengers.length > 0) {
+      const coachName = passengers[0].coach_name;
+      if (coachName) {
+        const roomName = `coach:${train_id}:${travel_date}:${coachName}`;
+        io.to(roomName).emit("seats_booked", {
+          seat_ids: passengers.map((p) => p.seat_id),
+          train_id,
+          travel_date,
+          coach_name: coachName,
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -81,6 +100,7 @@ export const addBooking = async (req, res) => {
     });
   }
 };
+
 export const getseats = async (req, res) => {
   try {
     const { train_id } = req.params;
@@ -90,8 +110,6 @@ export const getseats = async (req, res) => {
       success: true,
       seats,
     });
-    console.log(req.params);
-    console.log(req.query);
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -99,10 +117,90 @@ export const getseats = async (req, res) => {
     });
   }
 };
+
+export const lockSeatController = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+    const { train_id, travel_date, seat_id } = req.body;
+
+    if (!train_id || !travel_date || !seat_id) {
+      return res.status(400).json({
+        success: false,
+        message: "train_id, travel_date, and seat_id are required",
+      });
+    }
+
+    const lockData = await lockSeat(user_id, train_id, travel_date, seat_id);
+
+    const io = req.app.get("io");
+    if (io) {
+      const roomName = `coach:${train_id}:${travel_date}:${lockData.coach_name}`;
+      io.to(roomName).emit("seat_locked", {
+        seat_id,
+        seat_number: lockData.seat_number,
+        coach_name: lockData.coach_name,
+        user_id,
+        train_id,
+        travel_date,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Seat locked successfully",
+      lock: lockData,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const unlockSeatController = async (req, res) => {
+  try {
+    const user_id = req.user.user_id;
+    const { train_id, travel_date, seat_id } = req.body;
+
+    if (!train_id || !travel_date || !seat_id) {
+      return res.status(400).json({
+        success: false,
+        message: "train_id, travel_date, and seat_id are required",
+      });
+    }
+
+    const unlockData = await unlockSeat(user_id, train_id, travel_date, seat_id);
+
+    const io = req.app.get("io");
+    if (io && unlockData.coach_name) {
+      const roomName = `coach:${train_id}:${travel_date}:${unlockData.coach_name}`;
+      io.to(roomName).emit("seat_unlocked", {
+        seat_id,
+        seat_number: unlockData.seat_number,
+        coach_name: unlockData.coach_name,
+        user_id,
+        train_id,
+        travel_date,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Seat unlocked successfully",
+      unlock: unlockData,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const myBookings = async (req, res) => {
   try {
     const user_id = req.user.user_id;
-    // console.log(req.user)
     const bookings = await getMyBookings(user_id);
     return res.status(200).json({
       success: true,
@@ -117,6 +215,7 @@ export const myBookings = async (req, res) => {
     });
   }
 };
+
 export const bookingDetails = async (req, res) => {
   try {
     const { booking_id } = req.params;
@@ -140,6 +239,7 @@ export const bookingDetails = async (req, res) => {
     });
   }
 };
+
 export const bookingDetailsPNR = async (req, res) => {
   try {
     const { pnr_number } = req.params;
@@ -163,6 +263,7 @@ export const bookingDetailsPNR = async (req, res) => {
     });
   }
 };
+
 export const cancelBooking = async (req, res) => {
   try {
     const user_id = req.user.user_id;

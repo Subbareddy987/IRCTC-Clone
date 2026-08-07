@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
@@ -17,6 +17,16 @@ import AboutDeveloper from "./pages/AboutDeveloper.jsx";
 import Navbar from "./components/Navbar.jsx";
 import ChatBot from "./components/Chatbot/ChatBot";
 import "./styles/global.css";
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function AppContent() {
   const location = useLocation();
 
@@ -26,6 +36,7 @@ function AppContent() {
 
   return (
     <>
+      <ScrollToTop />
       {!hideNavbar && <Navbar />}
 
       <Routes>

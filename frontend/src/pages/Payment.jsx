@@ -232,27 +232,6 @@ function Payment() {
               </div>
             </div>
 
-            <div className="py-card py-upi-card">
-              <div className="py-card-head">
-                <span className="py-card-icon">UPI</span>
-                <h2 className="py-card-title">Pay via UPI</h2>
-              </div>
-              <div className="py-qr-wrap">
-                <div className="py-qr-frame">
-                  <QRCodeCanvas value={upiLink} size={160} level="H" />
-                </div>
-                <p className="py-qr-hint">
-                  Scan with PhonePe, Google Pay, Paytm or any UPI app
-                </p>
-                <div className="py-upi-apps">
-                  <span className="py-upi-chip">PhonePe</span>
-                  <span className="py-upi-chip">GPay</span>
-                  <span className="py-upi-chip">Paytm</span>
-                  <span className="py-upi-chip">BHIM</span>
-                </div>
-              </div>
-            </div>
-
             <button
               className={`py-pay-btn ${loading ? "py-pay-btn--loading" : ""}`}
               disabled={loading}
@@ -270,6 +249,27 @@ function Payment() {
             <p className="py-secure-note">
               Your payment is secured by 256-bit SSL encryption
             </p>
+
+            <div className="py-card py-upi-card">
+              <div className="py-card-head">
+                <span className="py-card-icon">UPI</span>
+                <h2 className="py-card-title">Pay via UPI QR</h2>
+              </div>
+              <div className="py-qr-wrap">
+                <div className="py-qr-frame">
+                  <QRCodeCanvas value={upiLink} size={160} level="H" />
+                </div>
+                <p className="py-qr-hint">
+                  Scan with PhonePe, Google Pay, Paytm or any UPI app
+                </p>
+                <div className="py-upi-apps">
+                  <span className="py-upi-chip">PhonePe</span>
+                  <span className="py-upi-chip">GPay</span>
+                  <span className="py-upi-chip">Paytm</span>
+                  <span className="py-upi-chip">BHIM</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

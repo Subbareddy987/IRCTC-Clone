@@ -190,6 +190,10 @@
   border-radius: 4px;
 }
 
+.locked-label {
+  background: #d97706;
+}
+
 /* Mobile */
 @media (max-width: 480px) {
   .coach-wrapper { padding: 0.85rem; }

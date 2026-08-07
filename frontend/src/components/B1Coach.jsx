@@ -9,9 +9,11 @@ function B1Coach({ coachName = "B1", seats = [], passengers = [], assignSeat }) 
 
   const getSeatClassName = (seat) => {
     const classes = ["rail-seat"];
+    const selected = isSelected(seat.seat_id);
+    const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
 
-    if (seat.status !== "AVAILABLE") classes.push("booked");
-    if (isSelected(seat.seat_id)) classes.push("selected");
+    if (isUnavailable && !selected) classes.push("booked");
+    if (selected) classes.push("selected");
 
     return classes.join(" ");
   };
@@ -19,23 +21,20 @@ function B1Coach({ coachName = "B1", seats = [], passengers = [], assignSeat }) 
   const renderSeat = (seat) => {
     if (!seat) return <div className="seat-placeholder" />;
 
-    const isAvailable = seat.status === "AVAILABLE";
+    const selected = isSelected(seat.seat_id);
+    const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
 
     return (
       <button
         key={seat.seat_id}
         type="button"
         className={getSeatClassName(seat)}
-        disabled={!isAvailable}
-        onClick={() => isAvailable && assignSeat(seat)}
+        disabled={isUnavailable && !selected}
+        onClick={() => (!isUnavailable || selected) && assignSeat(seat)}
       >
         <span className="seat-number">{seat.seat_number}</span>
-
         <span className="seat-berth">{seat.berth_type}</span>
-
-        {!isAvailable && (
-          <span className="booked-label">BOOKED</span>
-        )}
+        {isUnavailable && !selected && <span className="booked-label">BOOKED</span>}
       </button>
     );
   };
@@ -60,13 +59,13 @@ function B1Coach({ coachName = "B1", seats = [], passengers = [], assignSeat }) 
           </div>
 
           <div>
-            <span className="dot booked" />
-            Booked
+            <span className="dot selected" />
+            Selected
           </div>
 
           <div>
-            <span className="dot selected" />
-            Selected
+            <span className="dot booked" />
+            Booked
           </div>
         </div>
       </header>

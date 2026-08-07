@@ -83,6 +83,17 @@ CREATE TABLE IF NOT EXISTS booked_seats (
   UNIQUE (seat_id, train_id, travel_date)
 );
 
+CREATE TABLE IF NOT EXISTS seat_locks (
+  lock_id SERIAL PRIMARY KEY,
+  seat_id INTEGER NOT NULL REFERENCES seats(seat_id) ON DELETE CASCADE,
+  train_id INTEGER NOT NULL REFERENCES trains(train_id) ON DELETE CASCADE,
+  travel_date DATE NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  locked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '10 minutes'),
+  UNIQUE (seat_id, train_id, travel_date)
+);
+
 CREATE TABLE IF NOT EXISTS food_items (
   food_id SERIAL PRIMARY KEY,
   food_name VARCHAR(120) NOT NULL,

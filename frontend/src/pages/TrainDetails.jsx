@@ -98,6 +98,7 @@ function TrainDetails() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     async function loadTrain() {
       try {
         const response = await getTraindetails(train_id, sourceCode, destinationCode);
@@ -133,10 +134,18 @@ function TrainDetails() {
     );
   }
 
-  const traininfo = train[0];
-  const lastStation = train[train.length - 1];
+  const firstStation = train[0];
+  const finalStation = train[train.length - 1];
+  const userSourceStation =
+    train.find((s) => s.is_user_source || s.station_code === sourceCode) || firstStation;
+  const userDestStation =
+    train.find((s) => s.is_user_destination || s.station_code === destinationCode) || finalStation;
+
   const totalStops = train.length;
-  const segmentStopCount = Math.max(totalStops - 1, 0);
+  const userSegmentStops = Math.max(
+    (userDestStation?.stop_order || 1) - (userSourceStation?.stop_order || 1),
+    0,
+  );
 
   return (
     <div className="td-page">
@@ -148,38 +157,38 @@ function TrainDetails() {
           <span className="td-eyebrow">Indian Railways</span>
           <div className="td-train-number">
             <span className="td-hash">#</span>
-            {traininfo.train_number}
+            {firstStation.train_number}
           </div>
-          <h1 className="td-train-name">{traininfo.train_name}</h1>
+          <h1 className="td-train-name">{firstStation.train_name}</h1>
           <div className="td-meta-row">
             <span className="td-meta-pill">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                 <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              {segmentStopCount} {segmentStopCount === 1 ? "Stop" : "Stops"}
+              Full Route: {totalStops} Stations ({userSegmentStops} Stops for your journey)
             </span>
             <span className="td-meta-pill">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke="currentColor" strokeWidth="2"/>
                 <circle cx="12" cy="11" r="3" stroke="currentColor" strokeWidth="2"/>
               </svg>
-              {traininfo.station_name} ({traininfo.station_code}) → {lastStation.station_name} ({lastStation.station_code})
+              Boarding: {userSourceStation.station_name} ({userSourceStation.station_code}) → Deboarding: {userDestStation.station_name} ({userDestStation.station_code})
             </span>
           </div>
           <button
             className="td-avail-btn"
             onClick={() =>
               navigate(`/availability/${train_id}?${new URLSearchParams({
-                source: String(traininfo.station_id),
-                destination: String(lastStation.station_id),
-                sourceCode: traininfo.station_code,
-                destinationCode: lastStation.station_code,
-                sourceName: traininfo.station_name,
-                destinationName: lastStation.station_name,
+                source: String(userSourceStation.station_id),
+                destination: String(userDestStation.station_id),
+                sourceCode: userSourceStation.station_code,
+                destinationCode: userDestStation.station_code,
+                sourceName: userSourceStation.station_name,
+                destinationName: userDestStation.station_name,
                 date: travelDate,
                 class: preferredClass,
-                stops: String(segmentStopCount),
+                stops: String(userSegmentStops),
               }).toString()}`)
             }
           >
@@ -200,8 +209,10 @@ function TrainDetails() {
       {/* ── Route Section ── */}
       <section className="td-route-section">
         <div className="td-route-header">
-          <h2>Journey Route</h2>
-          <p>Showing only your journey from {traininfo.station_name} to {lastStation.station_name}</p>
+          <h2>Complete Train Schedule &amp; Route</h2>
+          <p>
+            Starting from Origin <strong>{firstStation.station_name} ({firstStation.station_code})</strong> to Final Stop <strong>{finalStation.station_name} ({finalStation.station_code})</strong>
+          </p>
         </div>
 
         {/* Railway Track Timeline */}
@@ -227,18 +238,21 @@ function TrainDetails() {
               const place = stationImages[station.station_code] || defaultPlace;
               const isFirst = idx === 0;
               const isLast = idx === train.length - 1;
+              const isUserSource = station.is_user_source || station.station_code === sourceCode;
+              const isUserDest = station.is_user_destination || station.station_code === destinationCode;
+              const isUserSegment = station.is_user_segment;
               const side = idx % 2 === 0 ? "left" : "right";
 
               return (
                 <div
                   key={station.stop_order}
-                  className={`td-stop td-stop-${side}`}
+                  className={`td-stop td-stop-${side} ${isUserSegment ? "td-user-segment" : ""}`}
                   style={{ animationDelay: `${idx * 80}ms` }}
                 >
                   {/* Station dot on track */}
-                  <div className={`td-station-dot ${isFirst ? "td-dot-first" : isLast ? "td-dot-last" : ""}`}>
-                    {isFirst && <span className="td-dot-label">START</span>}
-                    {isLast && <span className="td-dot-label td-dot-label-end">END</span>}
+                  <div className={`td-station-dot ${isFirst ? "td-dot-first" : isLast ? "td-dot-last" : ""} ${isUserSource || isUserDest ? "td-dot-highlight" : ""}`}>
+                    {isFirst && <span className="td-dot-label">ORIGIN</span>}
+                    {isLast && <span className="td-dot-label td-dot-label-end">FINAL</span>}
                     <div className="td-dot-pulse" />
                   </div>
 
@@ -246,7 +260,7 @@ function TrainDetails() {
                   <div className="td-arm" />
 
                   {/* Station Card */}
-                  <div className="td-card">
+                  <div className={`td-card ${isUserSource ? "td-card-user-source" : ""} ${isUserDest ? "td-card-user-dest" : ""}`}>
                     <div className="td-card-img-wrap">
                       <img
                         src={place.image}
@@ -262,8 +276,10 @@ function TrainDetails() {
                     <div className="td-card-body">
                       <div className="td-station-code-row">
                         <span className="td-station-code">{station.station_code}</span>
-                        {isFirst && <span className="td-terminal-tag origin">Origin</span>}
-                        {isLast && <span className="td-terminal-tag dest">Destination</span>}
+                        {isFirst && <span className="td-terminal-tag origin">Train Origin</span>}
+                        {isLast && <span className="td-terminal-tag dest">Train Terminus</span>}
+                        {isUserSource && <span className="td-terminal-tag origin" style={{ background: '#22c55e', color: '#fff' }}>Your Boarding</span>}
+                        {isUserDest && <span className="td-terminal-tag dest" style={{ background: '#ef4444', color: '#fff' }}>Your Deboarding</span>}
                       </div>
                       <h3 className="td-station-name">{station.station_name}</h3>
                       <h4 className="td-place-name">{place.place}</h4>

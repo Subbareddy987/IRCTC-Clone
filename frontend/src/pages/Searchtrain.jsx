@@ -111,42 +111,41 @@ function formatTrainTime(time) {
 function Searchtrain() {
   const [source, setSource] = useState({ code: "", name: "" });
   const [destination, setDestination] = useState({ code: "", name: "" });
-  const [journeyDate, setJourneyDate] = useState("");
+  const [journeyDate, setJourneyDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [coachType] = useState("Sleeper");
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(false);
   const [stations, setStations] = useState([]);
   const navigate = useNavigate();
-   useEffect(() => {
-  async function loadStations() {
-    try {
-      const data = await getStations();
-      setStations(data.stations);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const resultsRef = useRef(null);
 
-  loadStations();
-}, []);
-  const swapStations = () => {
-    const temp = source;
-    setSource(destination);
-    setDestination(temp);
-  };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!source.code || !destination.code) {
-      toast.error("Please select valid stations from the suggestions.");
-      return;
+  useEffect(() => {
+    async function loadStations() {
+      try {
+        const data = await getStations();
+        setStations(data.stations);
+      } catch (error) {
+        console.log(error);
+      }
     }
+
+    loadStations();
+  }, []);
+
+  const executeSearch = async (srcCode, destCode) => {
+    if (!srcCode || !destCode) return;
     setLoading(true);
     try {
-      const response = await searchTrains(source.code, destination.code);
-      setTrains(response.train);
+      const response = await searchTrains(srcCode, destCode);
+      setTrains(response.train || []);
       if (!response.train?.length) {
         toast.info("No trains found for this route.");
+      } else {
+        setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       }
     } catch (error) {
       console.error(error);
@@ -154,6 +153,27 @@ function Searchtrain() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (source.code && destination.code) {
+      executeSearch(source.code, destination.code);
+    }
+  }, [source.code, destination.code]);
+
+  const swapStations = () => {
+    const temp = source;
+    setSource(destination);
+    setDestination(temp);
+  };
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    if (!source.code || !destination.code) {
+      toast.error("Please select valid stations from the suggestions.");
+      return;
+    }
+    executeSearch(source.code, destination.code);
   };
 
   return (
@@ -261,7 +281,7 @@ function Searchtrain() {
 
       {/* Results */}
       {trains.length > 0 && (
-        <section className="results">
+        <section className="results" ref={resultsRef}>
           <div className="results-inner">
             <div className="results-header">
               <h2 className="results-title">

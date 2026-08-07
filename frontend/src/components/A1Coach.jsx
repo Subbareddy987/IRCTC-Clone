@@ -7,16 +7,18 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
   const renderSeat = (seat) => {
     if (!seat) return null;
 
+    const selected = isSelected(seat.seat_id);
+    const isUnavailable = seat.status === "BOOKED" || (seat.status === "LOCKED" && !selected);
+
     return (
       <button
         type="button"
         className={`a1-seat
-          ${seat.status !== "AVAILABLE" ? "booked" : ""}
-          ${isSelected(seat.seat_id) ? "selected" : ""}
+          ${isUnavailable && !selected ? "booked" : ""}
+          ${selected ? "selected" : ""}
         `}
-        onClick={() =>
-          seat.status === "AVAILABLE" && assignSeat(seat)
-        }
+        disabled={isUnavailable && !selected}
+        onClick={() => (!isUnavailable || selected) && assignSeat(seat)}
       >
         <div className="a1-seat-number">
           {seat.seat_number}
@@ -48,13 +50,13 @@ function A1Coach({ coachName = "A1", seats, passengers, assignSeat }) {
           </div>
 
           <div>
-            <span className="a1-dot booked"></span>
-            Booked
+            <span className="a1-dot selected"></span>
+            Selected
           </div>
 
           <div>
-            <span className="a1-dot selected"></span>
-            Selected
+            <span className="a1-dot booked"></span>
+            Booked
           </div>
         </div>
       </div>

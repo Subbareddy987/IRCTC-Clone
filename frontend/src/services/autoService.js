@@ -1,7 +1,7 @@
 import axios from "axios";
 const API_URL =
   import.meta.env.VITE_API_URL || "https://irctc-backend-r0p7.onrender.com/api";
-const FOOD_CACHE_KEY = "food_menu_cache_v1";
+const FOOD_CACHE_KEY = "food_menu_cache_v2";
 const FOOD_CACHE_TTL_MS = 10 * 60 * 1000;
 
 const readFoodCache = () => {
@@ -73,6 +73,34 @@ export const getSeats = async (train_id, travel_date, coach_name) => {
     params: { travel_date, coach_name },
   });
 
+  return response.data;
+};
+
+export const lockSeatApi = async (train_id, travel_date, seat_id) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.post(
+    `${API_URL}/bookings/lock`,
+    { train_id, travel_date, seat_id },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return response.data;
+};
+
+export const unlockSeatApi = async (train_id, travel_date, seat_id) => {
+  const token = localStorage.getItem("token");
+  const response = await axios.post(
+    `${API_URL}/bookings/unlock`,
+    { train_id, travel_date, seat_id },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
   return response.data;
 };
 export const createBooking = async (bookingData) => {

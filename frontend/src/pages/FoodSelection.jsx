@@ -7,6 +7,59 @@ import {
 } from "../services/autoService";
 import "./FoodSelection.css";
 
+const LOCAL_FOOD_IMAGE_MAP = {
+  "coffee": "/food/coffee.png",
+  "south indian thali": "/food/south-indian-thali.png",
+  "veg biryani": "/food/veg-biryani.png",
+  "chicken biryani": "/food/chicken-biryani.png",
+  "veg meals": "/food/veg-meals.png",
+  "paneer curry & roti": "/food/paneer-curry.png",
+  "paneer butter masala & naan": "/food/paneer-curry.png",
+  "masala dosa": "/food/masala-dosa.png",
+  "plain dosa": "/food/dosa.png",
+  "idli sambar (3 pcs)": "/food/idli-sambar.png",
+  "idli": "/food/idli.png",
+  "medu vada (2 pcs)": "/food/vada.png",
+  "poori masala (3 pcs)": "/food/poori.png",
+  "hot samosa (2 pcs)": "/food/samosa.png",
+  "veg burger": "/food/burger.png",
+  "club sandwich": "/food/sandwich.png",
+  "french fries": "/food/fries.png",
+  "veg fried rice": "/food/fried-rice.png",
+  "masala tea / chai": "/food/tea.png",
+  "chilled soft drink": "/food/cooldrink.png",
+  "fresh fruit juice": "/food/juice.png",
+  "mineral water (1l)": "/food/water.png",
+  "water bottle": "/food/water.png",
+  "chocolate ice cream": "/food/icecream.png",
+  "pastry cake slice": "/food/cake.png",
+};
+
+const DEFAULT_IRCTC_PANTRY_MENU = [
+  { food_id: 101, food_name: "Chicken Biryani", category: "Biryani", price: 240, image_url: "/food/chicken-biryani.png", available_qty: 85, is_available: true },
+  { food_id: 102, food_name: "Veg Biryani", category: "Biryani", price: 180, image_url: "/food/veg-biryani.png", available_qty: 120, is_available: true },
+  { food_id: 103, food_name: "South Indian Thali", category: "Meals", price: 160, image_url: "/food/south-indian-thali.png", available_qty: 100, is_available: true },
+  { food_id: 104, food_name: "Veg Meals", category: "Meals", price: 150, image_url: "/food/veg-meals.png", available_qty: 150, is_available: true },
+  { food_id: 105, food_name: "Paneer Curry & Roti", category: "Meals", price: 210, image_url: "/food/paneer-curry.png", available_qty: 90, is_available: true },
+  { food_id: 106, food_name: "Masala Dosa", category: "Breakfast", price: 90, image_url: "/food/masala-dosa.png", available_qty: 110, is_available: true },
+  { food_id: 107, food_name: "Plain Dosa", category: "Breakfast", price: 80, image_url: "/food/dosa.png", available_qty: 120, is_available: true },
+  { food_id: 108, food_name: "Idli Sambar (3 Pcs)", category: "Breakfast", price: 60, image_url: "/food/idli-sambar.png", available_qty: 140, is_available: true },
+  { food_id: 109, food_name: "Medu Vada (2 Pcs)", category: "Breakfast", price: 60, image_url: "/food/vada.png", available_qty: 100, is_available: true },
+  { food_id: 110, food_name: "Poori Masala (3 Pcs)", category: "Breakfast", price: 80, image_url: "/food/poori.png", available_qty: 95, is_available: true },
+  { food_id: 111, food_name: "Hot Samosa (2 Pcs)", category: "Snacks", price: 40, image_url: "/food/samosa.png", available_qty: 200, is_available: true },
+  { food_id: 112, food_name: "Veg Burger", category: "Snacks", price: 99, image_url: "/food/burger.png", available_qty: 80, is_available: true },
+  { food_id: 113, food_name: "Club Sandwich", category: "Snacks", price: 89, image_url: "/food/sandwich.png", available_qty: 90, is_available: true },
+  { food_id: 114, food_name: "French Fries", category: "Snacks", price: 79, image_url: "/food/fries.png", available_qty: 110, is_available: true },
+  { food_id: 115, food_name: "Veg Fried Rice", category: "Meals", price: 140, image_url: "/food/fried-rice.png", available_qty: 100, is_available: true },
+  { food_id: 116, food_name: "Hot Filter Coffee", category: "Beverages", price: 30, image_url: "/food/coffee.png", available_qty: 250, is_available: true },
+  { food_id: 117, food_name: "Masala Tea / Chai", category: "Beverages", price: 20, image_url: "/food/tea.png", available_qty: 300, is_available: true },
+  { food_id: 118, food_name: "Chilled Soft Drink", category: "Beverages", price: 40, image_url: "/food/cooldrink.png", available_qty: 200, is_available: true },
+  { food_id: 119, food_name: "Fresh Fruit Juice", category: "Beverages", price: 60, image_url: "/food/juice.png", available_qty: 150, is_available: true },
+  { food_id: 120, food_name: "Mineral Water (1L)", category: "Beverages", price: 20, image_url: "/food/water.png", available_qty: 500, is_available: true },
+  { food_id: 121, food_name: "Chocolate Ice Cream", category: "Desserts", price: 50, image_url: "/food/icecream.png", available_qty: 120, is_available: true },
+  { food_id: 122, food_name: "Pastry Cake Slice", category: "Desserts", price: 70, image_url: "/food/cake.png", available_qty: 90, is_available: true }
+];
+
 function FoodSelection() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,15 +73,43 @@ function FoodSelection() {
   const [cart, setCart] = useState({});
 
   const loadStationMenu = async (stationCode) => {
-    const response = await getStationFoodMenu(stationCode);
-    const menu = response.menu || [];
+    let apiMenu = [];
+    try {
+      const response = await getStationFoodMenu(stationCode);
+      apiMenu = Array.isArray(response)
+        ? response
+        : response?.menu || [];
+    } catch (err) {
+      console.warn("Using default food menu", err);
+    }
+
+    const existingNames = new Set(
+      apiMenu.map((m) => (m.food_name || "").toLowerCase()),
+    );
+    const mergedMenu = apiMenu.map((item) => {
+      const nameKey = (item.food_name || "").toLowerCase();
+      const localImage = LOCAL_FOOD_IMAGE_MAP[nameKey];
+      return {
+        ...item,
+        image_url: localImage || item.image_url,
+      };
+    });
+
+    for (const defaultItem of DEFAULT_IRCTC_PANTRY_MENU) {
+      if (!existingNames.has(defaultItem.food_name.toLowerCase())) {
+        mergedMenu.push({
+          ...defaultItem,
+          station_code: stationCode,
+        });
+      }
+    }
 
     setMenus((prev) => ({
       ...prev,
-      [stationCode]: menu,
+      [stationCode]: mergedMenu,
     }));
 
-    return menu;
+    return mergedMenu;
   };
 
   useEffect(() => {
@@ -274,7 +355,7 @@ function FoodSelection() {
                     const isMaxed = quantity >= Number(item.available_qty);
 
                     return (
-                      <article className="fs-food-card" key={item.menu_id}>
+                      <article className="fs-food-card" key={item.food_id || item.menu_id || item.food_name}>
                         <div className="fs-food-img">
                           {item.image_url ? (
                             <img src={item.image_url} alt={item.food_name} />

@@ -34,27 +34,42 @@ export const createBooking = async (
         [passenger.seat_id, train_id, travel_date],
       );
       if (seatCheck.rows.length > 0) {
-        throw new Error(`Seat ${passenger.seat_id} already booked`);
+        throw new Error(`Seat is already booked`);
       }
+
+      const lockCheck = await client.query(
+        `SELECT user_id FROM seat_locks WHERE seat_id=$1 AND train_id=$2 AND travel_date=$3 AND expires_at > NOW()`,
+        [passenger.seat_id, train_id, travel_date],
+      );
+      if (lockCheck.rows.length > 0 && lockCheck.rows[0].user_id !== user_id) {
+        throw new Error(`Seat is locked by another passenger`);
+      }
+
       const passengerQuery = `INSERT INTO passengers(booking_id,passenger_name,age,gender,seat_id)
                                   VALUES($1,$2,$3,$4,$5)
                                   RETURNING *;`;
-      const passengerResult = await client.query(passengerQuery, [
+      await client.query(passengerQuery, [
         bookings.booking_id,
         passenger.passenger_name,
         passenger.age,
         passenger.gender,
         passenger.seat_id,
       ]);
+
       const bookedseatquery = `INSERT INTO booked_seats(seat_id,train_id,travel_date,booking_id)
                                VALUES($1,$2,$3,$4)
                                RETURNING *;`;
-      const seatResult = await client.query(bookedseatquery, [
+      await client.query(bookedseatquery, [
         passenger.seat_id,
         train_id,
         travel_date,
         bookings.booking_id,
       ]);
+
+      await client.query(
+        `DELETE FROM seat_locks WHERE seat_id=$1 AND train_id=$2 AND travel_date=$3`,
+        [passenger.seat_id, train_id, travel_date],
+      );
     }
 
     if (Array.isArray(food_orders) && food_orders.length > 0) {
@@ -216,30 +231,128 @@ const createFoodOrders = async (
   }
 };
 
+const ensureLockTable = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS seat_locks (
+      lock_id SERIAL PRIMARY KEY,
+      seat_id INTEGER NOT NULL REFERENCES seats(seat_id) ON DELETE CASCADE,
+      train_id INTEGER NOT NULL REFERENCES trains(train_id) ON DELETE CASCADE,
+      travel_date DATE NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+      locked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '10 minutes'),
+      UNIQUE (seat_id, train_id, travel_date)
+    );
+  `);
+};
+
 export const getSeatsByTrain = async (train_id, travel_date, coach_name) => {
+  try {
+    await ensureLockTable();
+    await pool.query("DELETE FROM seat_locks WHERE expires_at <= NOW()");
+  } catch (err) {
+    console.error("Lock table check error:", err.message);
+  }
+
   const query = `
     SELECT
       s.seat_id,
       s.seat_number,
       s.berth_type,
       c.coach_name,
-    CASE
-        WHEN bs.seat_id IS NOT NULL
-        THEN 'BOOKED'
+      CASE
+        WHEN bs.seat_id IS NOT NULL THEN 'BOOKED'
+        WHEN sl.seat_id IS NOT NULL THEN 'LOCKED'
         ELSE 'AVAILABLE'
-    END AS status
+      END AS status,
+      sl.user_id AS locked_by_user
     FROM seats s
     JOIN coaches c
-    ON s.coach_id = c.coach_id
+      ON s.coach_id = c.coach_id
     LEFT JOIN booked_seats bs
-    ON s.seat_id = bs.seat_id
-    AND bs.train_id = $1
-    AND bs.travel_date = $2
+      ON s.seat_id = bs.seat_id
+     AND bs.train_id = $1
+     AND bs.travel_date = $2
+    LEFT JOIN seat_locks sl
+      ON s.seat_id = sl.seat_id
+     AND sl.train_id = $1
+     AND sl.travel_date = $2
+     AND sl.expires_at > NOW()
     WHERE c.train_id = $1
-    AND c.coach_name = $3
+      AND c.coach_name = $3
     ORDER BY s.seat_number;`;
-  const result = await pool.query(query, [train_id, travel_date,coach_name]);
+
+  const result = await pool.query(query, [train_id, travel_date, coach_name]);
   return result.rows;
+};
+
+export const lockSeat = async (user_id, train_id, travel_date, seat_id) => {
+  await ensureLockTable();
+  await pool.query("DELETE FROM seat_locks WHERE expires_at <= NOW()");
+
+  const bookedCheck = await pool.query(
+    `SELECT 1 FROM booked_seats WHERE seat_id = $1 AND train_id = $2 AND travel_date = $3`,
+    [seat_id, train_id, travel_date],
+  );
+
+  if (bookedCheck.rows.length > 0) {
+    throw new Error("Seat is already booked");
+  }
+
+  const existingLock = await pool.query(
+    `SELECT user_id FROM seat_locks WHERE seat_id = $1 AND train_id = $2 AND travel_date = $3 AND expires_at > NOW()`,
+    [seat_id, train_id, travel_date],
+  );
+
+  if (existingLock.rows.length > 0 && Number(existingLock.rows[0].user_id) !== Number(user_id)) {
+    throw new Error("Seat is currently locked by another passenger");
+  }
+
+  const lockQuery = `
+    INSERT INTO seat_locks (seat_id, train_id, travel_date, user_id, locked_at, expires_at)
+    VALUES ($1, $2, $3, $4, NOW(), NOW() + INTERVAL '10 minutes')
+    ON CONFLICT (seat_id, train_id, travel_date)
+    DO UPDATE SET user_id = EXCLUDED.user_id, locked_at = NOW(), expires_at = NOW() + INTERVAL '10 minutes'
+    RETURNING *;
+  `;
+
+  const lockResult = await pool.query(lockQuery, [seat_id, train_id, travel_date, user_id]);
+
+  const seatMeta = await pool.query(
+    `SELECT s.seat_id, s.seat_number, s.berth_type, c.coach_name
+     FROM seats s JOIN coaches c ON s.coach_id = c.coach_id
+     WHERE s.seat_id = $1`,
+    [seat_id],
+  );
+
+  return {
+    ...lockResult.rows[0],
+    ...seatMeta.rows[0],
+  };
+};
+
+export const unlockSeat = async (user_id, train_id, travel_date, seat_id) => {
+  try {
+    await ensureLockTable();
+    const result = await pool.query(
+      `DELETE FROM seat_locks WHERE seat_id = $1 AND train_id = $2 AND travel_date = $3 AND user_id = $4 RETURNING *;`,
+      [seat_id, train_id, travel_date, user_id],
+    );
+
+    const seatMeta = await pool.query(
+      `SELECT s.seat_id, s.seat_number, s.berth_type, c.coach_name
+       FROM seats s JOIN coaches c ON s.coach_id = c.coach_id
+       WHERE s.seat_id = $1`,
+      [seat_id],
+    );
+
+    return {
+      unlocked: result.rows.length > 0,
+      ...seatMeta.rows[0],
+    };
+  } catch (err) {
+    return { unlocked: false };
+  }
 };
 export const getMyBookings = async (user_id) => {
   const query = `
