@@ -84,10 +84,43 @@
 .train-silhouette {
   position: absolute;
   bottom: 22px;
-  font-size: 2rem;
-  transform: scaleX(-1);
+  width: 72px;
+  height: 24px;
+  border-radius: 7px 12px 5px 5px;
+  background: linear-gradient(90deg, #e8eef5 0 18%, #F5A623 18% 30%, #e8eef5 30% 100%);
+  box-shadow:
+    inset -10px 0 0 rgba(11, 31, 58, 0.22),
+    0 7px 18px rgba(245,166,35,0.3);
   animation: trainMove 12s linear infinite;
-  filter: drop-shadow(0 0 12px rgba(245,166,35,0.6));
+}
+
+.train-silhouette::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 13px;
+  top: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #0B1F3A 0 8px,
+    transparent 8px 13px
+  );
+}
+
+.train-silhouette::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -5px;
+  height: 6px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 10px 50%, #0B1F3A 0 3px, transparent 4px),
+    radial-gradient(circle at 30px 50%, #0B1F3A 0 3px, transparent 4px),
+    radial-gradient(circle at 50px 50%, #0B1F3A 0 3px, transparent 4px);
 }
 
 @keyframes trainMove {

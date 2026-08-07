@@ -180,7 +180,7 @@ function Searchtrain() {
           <div className="hero-overlay" />
           <div className="moving-track">
             <div className="track-line" />
-            <div className="train-silhouette">🚂</div>
+            <div className="train-silhouette" aria-hidden="true" />
           </div>
         </div>
 
