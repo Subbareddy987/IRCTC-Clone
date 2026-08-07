@@ -137,6 +137,17 @@ ORDER BY tr.stop_order;`;
   const rows = result.rows;
 
   if (rows.length >= 5) {
+    if (source_code && destination_code) {
+      const sourceOrder = rows.find((row) => row.station_code === source_code)?.stop_order;
+      const destinationOrder = rows.find((row) => row.station_code === destination_code)?.stop_order;
+
+      if (sourceOrder && destinationOrder && sourceOrder < destinationOrder) {
+        return rows.filter(
+          (row) => row.stop_order >= sourceOrder && row.stop_order <= destinationOrder,
+        );
+      }
+    }
+
     return rows;
   }
 
@@ -161,7 +172,7 @@ ORDER BY tr.stop_order;`;
   if (srcIdx !== -1) srcOrder = srcIdx + 1;
   if (destIdx !== -1) destOrder = destIdx + 1;
 
-  return template.map((st, idx) => {
+  const enrichedRoute = template.map((st, idx) => {
     const stopOrder = idx + 1;
     const isSource = st.station_code === srcCode;
     const isDest = st.station_code === destCode;
@@ -184,6 +195,14 @@ ORDER BY tr.stop_order;`;
       is_user_segment: isUserSegment,
     };
   });
+
+  if (srcOrder < destOrder) {
+    return enrichedRoute.filter(
+      (station) => station.stop_order >= srcOrder && station.stop_order <= destOrder,
+    );
+  }
+
+  return enrichedRoute;
 };
 
 export const getCoachesByTrain = async (train_id) => {

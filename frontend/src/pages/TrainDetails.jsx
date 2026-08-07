@@ -143,7 +143,7 @@ function TrainDetails() {
 
   const totalStops = train.length;
   const userSegmentStops = Math.max(
-    (userDestStation?.stop_order || 1) - (userSourceStation?.stop_order || 1),
+    totalStops - 1,
     0,
   );
 
@@ -166,7 +166,7 @@ function TrainDetails() {
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                 <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              Full Route: {totalStops} Stations ({userSegmentStops} Stops for your journey)
+              Journey Route: {totalStops} Stations ({userSegmentStops} Stops)
             </span>
             <span className="td-meta-pill">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -209,9 +209,9 @@ function TrainDetails() {
       {/* ── Route Section ── */}
       <section className="td-route-section">
         <div className="td-route-header">
-          <h2>Complete Train Schedule &amp; Route</h2>
+          <h2>Your Journey Schedule &amp; Route</h2>
           <p>
-            Starting from Origin <strong>{firstStation.station_name} ({firstStation.station_code})</strong> to Final Stop <strong>{finalStation.station_name} ({finalStation.station_code})</strong>
+            Starting from <strong>{userSourceStation.station_name} ({userSourceStation.station_code})</strong> to <strong>{userDestStation.station_name} ({userDestStation.station_code})</strong>
           </p>
         </div>
 
@@ -251,8 +251,8 @@ function TrainDetails() {
                 >
                   {/* Station dot on track */}
                   <div className={`td-station-dot ${isFirst ? "td-dot-first" : isLast ? "td-dot-last" : ""} ${isUserSource || isUserDest ? "td-dot-highlight" : ""}`}>
-                    {isFirst && <span className="td-dot-label">ORIGIN</span>}
-                    {isLast && <span className="td-dot-label td-dot-label-end">FINAL</span>}
+                    {isFirst && <span className="td-dot-label">BOARDING</span>}
+                    {isLast && <span className="td-dot-label td-dot-label-end">DEBOARDING</span>}
                     <div className="td-dot-pulse" />
                   </div>
 
@@ -270,14 +270,14 @@ function TrainDetails() {
                         onError={(e) => { e.target.src = defaultPlace.image; }}
                       />
                       <div className="td-card-img-overlay" />
-                      <span className="td-stop-number">Stop {station.stop_order}</span>
+                      <span className="td-stop-number">Stop {idx + 1}</span>
                       <span className="td-highlight-badge">{place.highlight}</span>
                     </div>
                     <div className="td-card-body">
                       <div className="td-station-code-row">
                         <span className="td-station-code">{station.station_code}</span>
-                        {isFirst && <span className="td-terminal-tag origin">Train Origin</span>}
-                        {isLast && <span className="td-terminal-tag dest">Train Terminus</span>}
+                        {isFirst && !isUserSource && <span className="td-terminal-tag origin">Segment Start</span>}
+                        {isLast && !isUserDest && <span className="td-terminal-tag dest">Segment End</span>}
                         {isUserSource && <span className="td-terminal-tag origin" style={{ background: '#22c55e', color: '#fff' }}>Your Boarding</span>}
                         {isUserDest && <span className="td-terminal-tag dest" style={{ background: '#ef4444', color: '#fff' }}>Your Deboarding</span>}
                       </div>
